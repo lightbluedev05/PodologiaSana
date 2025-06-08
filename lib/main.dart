@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:podologia_sana/app_routes.dart';
 import 'package:podologia_sana/controllers/doctores_controller.dart';
 import 'package:podologia_sana/views/dashboard_admin/doctores_view.dart';
+import 'package:podologia_sana/controllers/pacientes_controller.dart';
 import 'package:provider/provider.dart';
 
 
@@ -11,6 +12,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => DoctoresController()),
+        ChangeNotifierProvider(create: (_) => PacientesController()),
         // Aquí puedes agregar más controllers en el futuro
       ],
       child: const MyApp(),

@@ -3,12 +3,15 @@ import 'package:http/http.dart' as http;
 import '../models/paciente_model.dart';
 
 class PacienteData {
-  final String baseUrl = 'https://tu-api.com/pacientes';
+  final String baseUrl = 'https://podologia-sana.onrender.com';
 
   Future<List<Paciente>> fetchPacientes() async {
-    final response = await http.get(Uri.parse(baseUrl));
+    print("paciente_data: fetchPacientes called");
+    final response = await http.get(Uri.parse('$baseUrl/pacientes'));
+    print("responde ok");
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final decoded = json.decode(response.body);
+      final List data = decoded['body']['data'];
       return data.map((e) => Paciente.fromJson(e)).toList();
     } else {
       throw Exception('Error al cargar pacientes');
@@ -17,7 +20,7 @@ class PacienteData {
 
   Future<void> createPaciente(Paciente paciente) async {
     await http.post(
-      Uri.parse(baseUrl),
+      Uri.parse('$baseUrl/paciente'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(paciente.toJson()),
     );

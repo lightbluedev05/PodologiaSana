@@ -9,7 +9,9 @@ class PacientesController extends ChangeNotifier {
   List<String> selectedIds = [];
 
   Future<void> loadPacientes() async {
+    print("pacientes_controller: loadPacientes called");
     _pacientes = await _data.fetchPacientes();
+    print("fetched pacientes");
     filteredPacientes = List.from(_pacientes);
     notifyListeners();
   }
@@ -36,17 +38,17 @@ class PacientesController extends ChangeNotifier {
 
   Future<void> addPaciente(Paciente paciente) async {
     await _data.createPaciente(paciente);
-    //await loadPacientes();
+    await loadPacientes();
   }
 
   Future<void> updatePaciente(String id, Paciente paciente) async {
     await _data.updatePaciente(id, paciente);
-    //await loadPacientes();
+    await loadPacientes();
   }
 
   Future<void> deleteSelected() async {
     await _data.deletePacientes(selectedIds);
     selectedIds.clear();
-    //await loadPacientes();
+    await loadPacientes();
   }
 }

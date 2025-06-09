@@ -29,6 +29,10 @@ class DashboardAdminController {
         icon: Icon(Icons.calendar_today),
         label: Text('Agenda'),
       ),
+      NavigationRailDestination(
+        icon: Icon(Icons.production_quantity_limits),
+        label: Text('Productos'),
+      ),
     ];
   }
 
@@ -45,6 +49,7 @@ class DashboardAdminController {
         _drawerItem(Icons.people, 'Pacientes', 2, onSelect),
         _drawerItem(Icons.attach_money, 'Ingresos', 3, onSelect),
         _drawerItem(Icons.calendar_today, 'Agenda', 4, onSelect),
+        _drawerItem(Icons.production_quantity_limits, 'Productos', 5, onSelect),
       ],
     );
   }

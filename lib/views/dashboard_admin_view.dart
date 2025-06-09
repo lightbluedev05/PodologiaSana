@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:podologia_sana/utils/colors.dart';
+import 'package:podologia_sana/views/dashboard_admin/productos_view.dart';
 import '../controllers/dashboard_admin_controller.dart';
 import 'dashboard_admin/inicio_view.dart';
 import 'dashboard_admin/doctores_view.dart';
@@ -23,6 +24,7 @@ class _DashboardAdminViewState extends State<DashboardAdminView> {
     PacientesView(),
     IngresosView(),
     AgendaView(),
+    ProductosView()
   ];
 
   @override

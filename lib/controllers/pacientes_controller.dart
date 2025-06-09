@@ -17,7 +17,6 @@ class PacientesController extends ChangeNotifier {
   }
 
 
-
   void filterPacientes(String query) {
     filteredPacientes = _pacientes
         .where((p) =>

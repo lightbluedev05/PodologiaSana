@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/productos_controller.dart';
 import '../../models/producto_model.dart';
+import '../../controllers/categoria__producto_controller.dart';
 
 class ProductosView extends StatefulWidget {
   const ProductosView({super.key});
@@ -13,11 +14,17 @@ class ProductosView extends StatefulWidget {
 class _ProductosViewState extends State<ProductosView> {
   final TextEditingController _searchController = TextEditingController();
 
+  final CategoriaController _categoriaController = CategoriaController();
+
+  List<String> categorias = [];
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    Future.microtask(() async {
       Provider.of<ProductosController>(context, listen: false).loadProductos();
+      categorias = await _categoriaController.obtenerNombresCategorias();
+      setState(() {});
     });
   }
 
@@ -28,7 +35,8 @@ class _ProductosViewState extends State<ProductosView> {
         return Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12),
+              padding:
+              const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12),
               child: Row(
                 children: [
                   Expanded(
@@ -50,12 +58,19 @@ class _ProductosViewState extends State<ProductosView> {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
+                    onPressed: () => _showCategoriaFormDialog(context),
+                    icon: const Icon(Icons.category),
+                    label: const Text("+CATEGORIAS"),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
                     onPressed: controller.selectedIds.isEmpty
                         ? null
                         : () async => controller.deleteSelected(),
                     icon: const Icon(Icons.delete),
                     label: const Text("Eliminar"),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red),
                   ),
                 ],
               ),
@@ -68,7 +83,8 @@ class _ProductosViewState extends State<ProductosView> {
                   final isSelected = controller.selectedIds.contains(producto.id);
 
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     child: ListTile(
                       leading: Checkbox(
                         value: isSelected,
@@ -102,66 +118,171 @@ class _ProductosViewState extends State<ProductosView> {
         text: producto != null ? producto.precio_venta.toString() : '');
     final stockCtrl = TextEditingController(
         text: producto != null ? producto.stock.toString() : '');
-    final categoriaCtrl = TextEditingController(text: producto?.categoria);
+    String selectedCategoria =
+        producto?.categoria ?? (categorias.isNotEmpty ? categorias.first : '');
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(isEdit ? 'Editar Producto' : 'Nuevo Producto'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: nombreCtrl, decoration: const InputDecoration(labelText: 'Nombre')),
-              TextField(controller: descripcionCtrl, decoration: const InputDecoration(labelText: 'Descripción')),
-              TextField(
-                controller: precioCtrl,
-                decoration: const InputDecoration(labelText: 'Precio de Venta'),
-                keyboardType: TextInputType.number,
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) {
+          bool _isFormValid() {
+            final nombre = nombreCtrl.text.trim();
+            final precio = double.tryParse(precioCtrl.text);
+            final stock = int.tryParse(stockCtrl.text);
+
+            return nombre.isNotEmpty &&
+                precio != null &&
+                precio > 0 &&
+                stock != null &&
+                stock >= 0;
+          }
+
+          void _onFieldChanged() {
+            setState(() {});
+          }
+
+          return AlertDialog(
+            title: Text(isEdit ? 'Editar Producto' : 'Nuevo Producto'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nombreCtrl,
+                    decoration: const InputDecoration(labelText: 'Nombre'),
+                    onChanged: (_) => _onFieldChanged(),
+                  ),
+                  TextField(
+                    controller: descripcionCtrl,
+                    decoration: const InputDecoration(labelText: 'Descripción'),
+                    onChanged: (_) => _onFieldChanged(),
+                  ),
+                  TextField(
+                    controller: precioCtrl,
+                    decoration:
+                    const InputDecoration(labelText: 'Precio de Venta'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => _onFieldChanged(),
+                  ),
+                  TextField(
+                    controller: stockCtrl,
+                    decoration: const InputDecoration(labelText: 'Stock'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => _onFieldChanged(),
+                  ),
+                  DropdownButtonFormField<String>(
+                    value: selectedCategoria,
+                    decoration: const InputDecoration(labelText: 'Categoría'),
+                    items: categorias.map((cat) {
+                      return DropdownMenuItem(
+                        value: cat,
+                        child: Text(cat),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          selectedCategoria = value;
+                        });
+                      }
+                    },
+                  ),
+                ],
               ),
-              TextField(
-                controller: stockCtrl,
-                decoration: const InputDecoration(labelText: 'Stock'),
-                keyboardType: TextInputType.number,
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancelar')),
+              ElevatedButton(
+                onPressed: _isFormValid()
+                    ? () async {
+                  final nombre = nombreCtrl.text.trim();
+                  final descripcion = descripcionCtrl.text.trim();
+                  final precio = double.tryParse(precioCtrl.text) ?? 0.0;
+                  final stock = int.tryParse(stockCtrl.text) ?? 0;
+
+                  if (isEdit) {
+                    await controller.updateProducto(
+                      id: producto!.id,
+                      nombre: nombre,
+                      descripcion: descripcion,
+                      precioVenta: precio,
+                      stock: stock,
+                      categoria: selectedCategoria,
+                    );
+                  } else {
+                    await controller.addProducto(
+                      nombre: nombre,
+                      descripcion: descripcion,
+                      precioVenta: precio,
+                      stock: stock,
+                      categoria: selectedCategoria,
+                    );
+                  }
+
+                  if (mounted) Navigator.of(context).pop();
+                }
+                    : null,
+                child: const Text('Guardar'),
               ),
-              TextField(controller: categoriaCtrl, decoration: const InputDecoration(labelText: 'Categoría')),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-          ElevatedButton(
-            onPressed: () async {
-              final nombre = nombreCtrl.text;
-              final descripcion = descripcionCtrl.text;
-              final precio = double.tryParse(precioCtrl.text) ?? 0.0;
-              final stock = int.tryParse(stockCtrl.text) ?? 0;
-              final categoria = categoriaCtrl.text;
+          );
+        },
+      ),
+    );
+  }
 
-              if (isEdit) {
-                await controller.updateProducto(
-                  id: producto!.id,
-                  nombre: nombre,
-                  descripcion: descripcion,
-                  precioVenta: precio,
-                  stock: stock,
-                  categoria: categoria,
-                );
-              } else {
-                await controller.addProducto(
-                  nombre: nombre,
-                  descripcion: descripcion,
-                  precioVenta: precio,
-                  stock: stock,
-                  categoria: categoria,
-                );
-              }
+  void _showCategoriaFormDialog(BuildContext context) {
+    final codigoCtrl = TextEditingController();
+    final nombreCtrl = TextEditingController();
 
-              if (mounted) Navigator.of(context).pop();
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
+    showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) {
+          bool _isFormValid() {
+            final codigo = codigoCtrl.text.trim();
+            final nombre = nombreCtrl.text.trim();
+
+            return codigo.isNotEmpty && nombre.isNotEmpty;
+          }
+
+          return AlertDialog(
+            title: const Text('Nueva Categoría'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: codigoCtrl,
+                  decoration: const InputDecoration(labelText: 'Código'),
+                  onChanged: (_) => setState(() {}),
+                ),
+                TextField(
+                  controller: nombreCtrl,
+                  decoration: const InputDecoration(labelText: 'Nombre'),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: _isFormValid()
+                    ? () async {
+                  // ACÁ VA LA LOGICA PARA AÑADIR CATEGORÍA
+
+                  Navigator.of(context).pop();
+                }
+                    : null,
+                child: const Text('Guardar'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

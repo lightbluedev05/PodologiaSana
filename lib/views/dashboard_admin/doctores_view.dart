@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/doctores_controller.dart';
+import '../../controllers/identificacion_tipo_controller.dart';
 import '../../models/doctor_model.dart';
 
 class DoctoresView extends StatefulWidget {
@@ -13,11 +14,25 @@ class DoctoresView extends StatefulWidget {
 class _DoctoresViewState extends State<DoctoresView> {
   final TextEditingController _searchController = TextEditingController();
 
+  final TipoIdentificacionController _identificacionController = TipoIdentificacionController();
+
+  List<String> TiposID = [];
+  String? selectedTipoDocumento;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        Provider.of<DoctoresController>(context, listen: false).loadDoctores());
+    Future.microtask(() async {
+      Provider.of<DoctoresController>(context, listen: false).loadDoctores();
+      TiposID = await _identificacionController.obtenerNombresTipos();
+
+      // Establece un valor por defecto para el dropdown si hay opciones
+      if (TiposID.isNotEmpty) {
+        selectedTipoDocumento = TiposID[0];
+      }
+
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -111,8 +126,9 @@ class _DoctoresViewState extends State<DoctoresView> {
     final telefonoController = TextEditingController(text: doctor?.telefono);
     final identificacionController = TextEditingController(text: doctor?.identificacion);
 
-    final List<String> tiposDocumento = ['DNI', 'Tipo1', 'Tipo2'];
-    String selectedTipoDocumento = doctor?.tipo_documento ?? 'DNI';
+    // Para editar, preseleccionamos el tipo de documento del doctor, si existe
+    String? dialogSelectedTipoDocumento =
+    isEditing ? doctor!.tipo_documento : (TiposID.isNotEmpty ? TiposID[0] : null);
 
     showDialog(
       context: context,
@@ -121,13 +137,15 @@ class _DoctoresViewState extends State<DoctoresView> {
           bool isFormValid = nombreController.text.trim().isNotEmpty &&
               apellidoController.text.trim().isNotEmpty &&
               telefonoController.text.trim().isNotEmpty &&
-              identificacionController.text.trim().isNotEmpty;
+              identificacionController.text.trim().isNotEmpty &&
+              dialogSelectedTipoDocumento != null;
 
           void validateForm() {
             final valid = nombreController.text.trim().isNotEmpty &&
                 apellidoController.text.trim().isNotEmpty &&
                 telefonoController.text.trim().isNotEmpty &&
-                identificacionController.text.trim().isNotEmpty;
+                identificacionController.text.trim().isNotEmpty &&
+                dialogSelectedTipoDocumento != null;
             if (valid != isFormValid) {
               setState(() {
                 isFormValid = valid;
@@ -135,7 +153,7 @@ class _DoctoresViewState extends State<DoctoresView> {
             }
           }
 
-          // Ejecuta al inicio para validar estado inicial
+          // Validar el formulario después del primer frame
           WidgetsBinding.instance.addPostFrameCallback((_) {
             validateForm();
           });
@@ -174,9 +192,9 @@ class _DoctoresViewState extends State<DoctoresView> {
                     },
                   ),
                   DropdownButtonFormField<String>(
-                    value: selectedTipoDocumento,
+                    value: dialogSelectedTipoDocumento,
                     decoration: const InputDecoration(labelText: 'Tipo de Documento'),
-                    items: tiposDocumento.map((tipo) {
+                    items: TiposID.map((tipo) {
                       return DropdownMenuItem(
                         value: tipo,
                         child: Text(tipo),
@@ -187,7 +205,7 @@ class _DoctoresViewState extends State<DoctoresView> {
                         : (value) {
                       if (value != null) {
                         setState(() {
-                          selectedTipoDocumento = value;
+                          dialogSelectedTipoDocumento = value;
                           validateForm();
                         });
                       }
@@ -226,7 +244,7 @@ class _DoctoresViewState extends State<DoctoresView> {
                       nombreController.text,
                       apellidoController.text,
                       telefonoController.text,
-                      selectedTipoDocumento,
+                      dialogSelectedTipoDocumento!,
                       doctor.id,
                     );
                   } else {
@@ -234,7 +252,7 @@ class _DoctoresViewState extends State<DoctoresView> {
                       nombreController.text,
                       apellidoController.text,
                       telefonoController.text,
-                      selectedTipoDocumento,
+                      dialogSelectedTipoDocumento!,
                       identificacionController.text,
                     );
                   }

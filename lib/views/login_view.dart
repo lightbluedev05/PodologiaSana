@@ -75,18 +75,15 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
 
-                  const SizedBox(height: 12),
-
+                  const SizedBox(height: 16),
                   // Aquí la imagen logo
                   SvgPicture.asset(
                     logo,
-                    color: Colors.white,
-                    height: 240, // Puedes ajustar tamaño
+                    height: 120,
                     fit: BoxFit.contain,
+                    color: Colors.white,
                   ),
-
                   const SizedBox(height: 24),
-
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(

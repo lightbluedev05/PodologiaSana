@@ -109,77 +109,142 @@ class _DoctoresViewState extends State<DoctoresView> {
     final nombreController = TextEditingController(text: doctor?.nombre);
     final apellidoController = TextEditingController(text: doctor?.apellido);
     final telefonoController = TextEditingController(text: doctor?.telefono);
-    final tipoDocumentoController =
-    TextEditingController(text: doctor?.tipo_documento);
-    final identificacionController =
-    TextEditingController(text: doctor?.identificacion);
+    final identificacionController = TextEditingController(text: doctor?.identificacion);
+
+    final List<String> tiposDocumento = ['DNI', 'Tipo1', 'Tipo2'];
+    String selectedTipoDocumento = doctor?.tipo_documento ?? 'DNI';
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(isEditing ? 'Editar Doctor' : 'Nuevo Doctor'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nombreController,
-                decoration: const InputDecoration(labelText: 'Nombre'),
-                enabled: !isEditing
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) {
+          bool isFormValid = nombreController.text.trim().isNotEmpty &&
+              apellidoController.text.trim().isNotEmpty &&
+              telefonoController.text.trim().isNotEmpty &&
+              identificacionController.text.trim().isNotEmpty;
+
+          void validateForm() {
+            final valid = nombreController.text.trim().isNotEmpty &&
+                apellidoController.text.trim().isNotEmpty &&
+                telefonoController.text.trim().isNotEmpty &&
+                identificacionController.text.trim().isNotEmpty;
+            if (valid != isFormValid) {
+              setState(() {
+                isFormValid = valid;
+              });
+            }
+          }
+
+          // Ejecuta al inicio para validar estado inicial
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            validateForm();
+          });
+
+          return AlertDialog(
+            title: Text(isEditing ? 'Editar Doctor' : 'Nuevo Doctor'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nombreController,
+                    decoration: const InputDecoration(labelText: 'Nombre'),
+                    enabled: !isEditing,
+                    onChanged: (_) => validateForm(),
+                  ),
+                  TextField(
+                    controller: apellidoController,
+                    decoration: const InputDecoration(labelText: 'Apellido'),
+                    enabled: !isEditing,
+                    onChanged: (_) => validateForm(),
+                  ),
+                  TextField(
+                    controller: telefonoController,
+                    decoration: const InputDecoration(labelText: 'Teléfono'),
+                    keyboardType: TextInputType.phone,
+                    onChanged: (value) {
+                      final cleaned = value.replaceAll(' ', '');
+                      if (value != cleaned) {
+                        telefonoController.value = TextEditingValue(
+                          text: cleaned,
+                          selection: TextSelection.collapsed(offset: cleaned.length),
+                        );
+                      }
+                      validateForm();
+                    },
+                  ),
+                  DropdownButtonFormField<String>(
+                    value: selectedTipoDocumento,
+                    decoration: const InputDecoration(labelText: 'Tipo de Documento'),
+                    items: tiposDocumento.map((tipo) {
+                      return DropdownMenuItem(
+                        value: tipo,
+                        child: Text(tipo),
+                      );
+                    }).toList(),
+                    onChanged: isEditing
+                        ? null
+                        : (value) {
+                      if (value != null) {
+                        setState(() {
+                          selectedTipoDocumento = value;
+                          validateForm();
+                        });
+                      }
+                    },
+                  ),
+                  TextField(
+                    controller: identificacionController,
+                    decoration: const InputDecoration(labelText: 'Identificación'),
+                    enabled: !isEditing,
+                    onChanged: (value) {
+                      final cleaned = value.replaceAll(' ', '');
+                      if (value != cleaned) {
+                        identificacionController.value = TextEditingValue(
+                          text: cleaned,
+                          selection: TextSelection.collapsed(offset: cleaned.length),
+                        );
+                      }
+                      validateForm();
+                    },
+                  ),
+                ],
               ),
-              TextField(
-                controller: apellidoController,
-                decoration: const InputDecoration(labelText: 'Apellido'),
-                enabled: !isEditing
+            ),
+            actions: [
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () => Navigator.of(context).pop(),
               ),
-              TextField(
-                controller: telefonoController,
-                decoration: const InputDecoration(labelText: 'Teléfono'),
-                enabled: true
-              ),
-              TextField(
-                controller: tipoDocumentoController,
-                decoration: const InputDecoration(labelText: 'Tipo de Documento'),
-                enabled: !isEditing
-              ),
-              TextField(
-                controller: identificacionController,
-                decoration: const InputDecoration(labelText: 'Identificación'),
-                enabled: !isEditing,
+              ElevatedButton(
+                child: const Text('Guardar'),
+                onPressed: isFormValid
+                    ? () async {
+                  if (isEditing) {
+                    await controller.updateDoctor(
+                      doctor!.identificacion,
+                      nombreController.text,
+                      apellidoController.text,
+                      telefonoController.text,
+                      selectedTipoDocumento,
+                      doctor.id,
+                    );
+                  } else {
+                    await controller.addDoctor(
+                      nombreController.text,
+                      apellidoController.text,
+                      telefonoController.text,
+                      selectedTipoDocumento,
+                      identificacionController.text,
+                    );
+                  }
+                  if (mounted) Navigator.of(context).pop();
+                }
+                    : null,
               ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: const Text('Cancelar'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          ElevatedButton(
-            child: const Text('Guardar'),
-            onPressed: () async {
-              if (isEditing) {
-                await controller.updateDoctor(
-                  doctor!.identificacion,
-                  nombreController.text,
-                  apellidoController.text,
-                  telefonoController.text,
-                  tipoDocumentoController.text,
-                  doctor.id
-                );
-              } else {
-                await controller.addDoctor(
-                  nombreController.text,
-                  apellidoController.text,
-                  telefonoController.text,
-                  tipoDocumentoController.text,
-                  identificacionController.text,
-                );
-              }
-              if (mounted) Navigator.of(context).pop();
-            },
-          ),
-        ],
+          );
+        },
       ),
     );
   }

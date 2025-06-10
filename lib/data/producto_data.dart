@@ -24,10 +24,30 @@ class ProductoData {
       body: json.encode(producto.toJson()),
     );
 
+    print('Status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw Exception('Error al crear producto');
+      try {
+        final decoded = json.decode(response.body);
+
+        if (decoded is Map && decoded.containsKey('body')) {
+          final errorBody = decoded['body'];
+          final details = errorBody['details'];
+
+          if (details is List && details.isNotEmpty) {
+            throw Exception(details.join('\n'));
+          }
+        }
+
+        throw Exception('Error desconocido');
+      } catch (e) {
+        print('Error parseando respuesta: $e');
+        throw e;
+      }
     }
   }
+
 
   Future<void> updateProducto(Producto producto) async {
     final url = '$baseUrl/producto/${producto.id}';

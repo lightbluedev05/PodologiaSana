@@ -195,6 +195,7 @@ class _ProductosViewState extends State<ProductosView> {
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Cancelar')),
               ElevatedButton(
+                child: const Text('Guardar'),
                 onPressed: _isFormValid()
                     ? () async {
                   final nombre = nombreCtrl.text.trim();
@@ -202,29 +203,45 @@ class _ProductosViewState extends State<ProductosView> {
                   final precio = double.tryParse(precioCtrl.text) ?? 0.0;
                   final stock = int.tryParse(stockCtrl.text) ?? 0;
 
-                  if (isEdit) {
-                    await controller.updateProducto(
-                      id: producto!.id,
-                      nombre: nombre,
-                      descripcion: descripcion,
-                      precioVenta: precio,
-                      stock: stock,
-                      categoria: selectedCategoria,
-                    );
-                  } else {
-                    await controller.addProducto(
-                      nombre: nombre,
-                      descripcion: descripcion,
-                      precioVenta: precio,
-                      stock: stock,
-                      categoria: selectedCategoria,
+                  try {
+                    if (isEdit) {
+                      await controller.updateProducto(
+                        id: producto!.id,
+                        nombre: nombre,
+                        descripcion: descripcion,
+                        precioVenta: precio,
+                        stock: stock,
+                        categoria: selectedCategoria,
+                      );
+                    } else {
+                      await controller.addProducto(
+                        nombre: nombre,
+                        descripcion: descripcion,
+                        precioVenta: precio,
+                        stock: stock,
+                        categoria: selectedCategoria,
+                      );
+                    }
+
+                    if (mounted) Navigator.of(context).pop();
+                  } catch (e) {
+                    // Mostrar el error como un AlertDialog, igual que en DoctoresView
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Error'),
+                        content: Text(e.toString().replaceFirst('Exception: ', '')),
+                        actions: [
+                          TextButton(
+                            child: const Text('Cerrar'),
+                            onPressed: () => Navigator.of(context).pop(),
+                          )
+                        ],
+                      ),
                     );
                   }
-
-                  if (mounted) Navigator.of(context).pop();
                 }
                     : null,
-                child: const Text('Guardar'),
               ),
             ],
           );

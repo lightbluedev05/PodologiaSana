@@ -32,6 +32,7 @@ class DoctoresController extends ChangeNotifier {
 
   Future<void> addDoctor(String nombre, String apellido, String telefono,
       String tipoDocumento, String identificacion) async {
+    print("Adding doctor: $nombre $apellido");
     final nuevo = Doctor(
       nombre: nombre,
       apellido: apellido,
@@ -39,8 +40,13 @@ class DoctoresController extends ChangeNotifier {
       tipo_documento: tipoDocumento,
       identificacion: identificacion,
     );
+
+    print(nombre + " " + apellido + " " + telefono + " " + tipoDocumento + " " + identificacion);
+
     await _data.createDoctor(nuevo);
+    print("Doctor added: $nombre $apellido");
     await loadDoctores();
+    print("Doctores loaded after adding: ${_doctores.length}");
   }
 
   Future<void> updateDoctor(String identificacion, String nombre, String apellido,

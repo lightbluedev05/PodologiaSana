@@ -18,11 +18,13 @@ class DoctorData {
 
 
   Future<void> createDoctor(Doctor doctor) async {
+    print(json.encode(doctor.toJson()));
     final response = await http.post(
       Uri.parse('$baseUrl/doctor'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(doctor.toJson()),
     );
+    print('Status: ${response.statusCode}');
     if (response.statusCode != 201) {
       throw Exception('Error al crear doctor');
     }

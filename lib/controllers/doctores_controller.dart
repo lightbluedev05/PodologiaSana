@@ -43,10 +43,15 @@ class DoctoresController extends ChangeNotifier {
 
     print(nombre + " " + apellido + " " + telefono + " " + tipoDocumento + " " + identificacion);
 
-    await _data.createDoctor(nuevo);
-    print("Doctor added: $nombre $apellido");
-    await loadDoctores();
-    print("Doctores loaded after adding: ${_doctores.length}");
+    try {
+      await _data.createDoctor(nuevo);
+      print("Doctor added: $nombre $apellido");
+      await loadDoctores();
+      print("Doctores loaded after adding: ${_doctores.length}");
+    } catch (e) {
+      print("Error en addDoctor: $e");
+      rethrow; // relanza el error para que la vista lo capture y lo muestre
+    }
   }
 
   Future<void> updateDoctor(String identificacion, String nombre, String apellido,

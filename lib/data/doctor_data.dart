@@ -18,15 +18,32 @@ class DoctorData {
 
 
   Future<void> createDoctor(Doctor doctor) async {
-    print(json.encode(doctor.toJson()));
     final response = await http.post(
       Uri.parse('$baseUrl/doctor'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(doctor.toJson()),
     );
     print('Status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
     if (response.statusCode != 201) {
-      throw Exception('Error al crear doctor');
+      try {
+        final decoded = json.decode(response.body);
+        final errorBody = decoded['body'];
+        final details = errorBody['details'];
+        final errorMsg = errorBody['error'];
+
+        if (details is List && details.isNotEmpty) {
+          throw Exception(details.join('\n'));
+        } else if (errorMsg is String) {
+          throw Exception(errorMsg);
+        } else {
+          throw Exception('Error desconocido del servidor');
+        }
+      } catch (e) {
+        print('Error parseando respuesta: $e');
+        throw e;
+      }
     }
   }
 

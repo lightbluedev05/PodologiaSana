@@ -238,25 +238,42 @@ class _DoctoresViewState extends State<DoctoresView> {
                 child: const Text('Guardar'),
                 onPressed: isFormValid
                     ? () async {
-                  if (isEditing) {
-                    await controller.updateDoctor(
-                      doctor!.identificacion,
-                      nombreController.text,
-                      apellidoController.text,
-                      telefonoController.text,
-                      dialogSelectedTipoDocumento!,
-                      doctor.id,
-                    );
-                  } else {
-                    await controller.addDoctor(
-                      nombreController.text,
-                      apellidoController.text,
-                      telefonoController.text,
-                      dialogSelectedTipoDocumento!,
-                      identificacionController.text,
+                  try {
+                    if (isEditing) {
+                      await controller.updateDoctor(
+                        doctor!.identificacion,
+                        nombreController.text,
+                        apellidoController.text,
+                        telefonoController.text,
+                        dialogSelectedTipoDocumento!,
+                        doctor.id,
+                      );
+                    } else {
+                      await controller.addDoctor(
+                        nombreController.text,
+                        apellidoController.text,
+                        telefonoController.text,
+                        dialogSelectedTipoDocumento!,
+                        identificacionController.text,
+                      );
+                    }
+                    if (mounted) Navigator.of(context).pop();
+                  } catch (e) {
+                    // Mostrar el error en un AlertDialog
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Error'),
+                        content: Text(e.toString().replaceFirst('Exception: ', '')),
+                        actions: [
+                          TextButton(
+                            child: const Text('Cerrar'),
+                            onPressed: () => Navigator.of(context).pop(),
+                          )
+                        ],
+                      ),
                     );
                   }
-                  if (mounted) Navigator.of(context).pop();
                 }
                     : null,
               ),

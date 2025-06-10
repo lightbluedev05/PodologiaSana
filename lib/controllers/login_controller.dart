@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../views/dashboard_admin_view.dart';
+import '../data/usuario_data.dart';
+import '../models/usuario_model.dart';
 
 class LoginController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  final UsuarioData _usuarioData = UsuarioData();
 
   void login(BuildContext context) async {
     final email = emailController.text.trim();
@@ -18,21 +22,25 @@ class LoginController {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    await Future.delayed(const Duration(seconds: 5));
+    try {
+      final usuario = Usuario(username: email, password: password);
+      final loggedUser = await _usuarioData.loginUsuario(usuario);
 
-    Navigator.of(context).pop();
+      Navigator.of(context).pop(); // Cierra el loading
 
-    if (email == 'admin' && password == 'admin') {
-      _navigateWithSlideAnimation(context, const DashboardAdminView());
-    } else if (email == 'doc' && password == 'doc') {
-      // _navigateWithSlideAnimation(context, const DashboardDoctoraView());
-    } else {
-      _showErrorDialog(context, 'Credenciales incorrectas');
+      if (loggedUser.rol.toLowerCase() == 'administrador') {
+        _navigateWithSlideAnimation(context, const DashboardAdminView());
+      } else if (loggedUser.rol.toLowerCase() == 'doctora') {
+        //_navigateWithSlideAnimation(context, const DashboardDoctoraView());
+      } else {
+        _showErrorDialog(context, 'Rol no reconocido: ${loggedUser.rol}');
+      }
+    } catch (e) {
+      Navigator.of(context).pop(); // Cierra el loading
+      _showErrorDialog(context, 'Error al iniciar sesión:\n${e.toString()}');
     }
   }
 

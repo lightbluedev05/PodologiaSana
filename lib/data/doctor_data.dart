@@ -68,4 +68,24 @@ class DoctorData {
       throw Exception('Error al eliminar doctor');
     }
   }
+
+  Future<Doctor> fetchDoctorById(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/doctor/$id'));
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      final data = decoded['body'];
+
+      return Doctor(
+        id: id,
+        nombre: data['nombre'],
+        apellido: data['apellido'],
+        telefono: data['telefono'],
+        tipo_documento: data['tipo_documento'],
+        identificacion: data['identificacion'],
+      );
+    } else {
+      throw Exception('No se pudo obtener el doctor por ID');
+    }
+  }
 }

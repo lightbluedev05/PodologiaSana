@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Podología Sana',
-      initialRoute: AppRoutes.login,
+      initialRoute: AppRoutes.dashboard_doctor,
       onGenerateRoute: AppRoutes.generateRoute,
       theme: ThemeData(
         textTheme: GoogleFonts.robotoTextTheme(),

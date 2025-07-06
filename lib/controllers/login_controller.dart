@@ -11,8 +11,8 @@ class LoginController {
   final UsuarioData _usuarioData = UsuarioData();
 
   void login(BuildContext context) async {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+    final email = emailController.text;
+    final password = passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
       _showErrorDialog(context, 'Por favor, completa ambos campos.');
@@ -33,7 +33,7 @@ class LoginController {
 
       if (loggedUser.rol.toLowerCase() == 'administrador') {
         _navigateWithSlideAnimation(context, const DashboardAdminView());
-      } else if (loggedUser.rol.toLowerCase() == 'doctora') {
+      } else if (loggedUser.rol.toLowerCase() == 'doctor') {
         //_navigateWithSlideAnimation(context, const DashboardDoctoraView());
       } else {
         _showErrorDialog(context, 'Rol no reconocido: ${loggedUser.rol}');

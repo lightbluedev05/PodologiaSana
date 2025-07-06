@@ -15,6 +15,7 @@ class Doctor {
     required this.identificacion
   });
 
+  // Leer apartir de un JSON
   factory Doctor.fromJson(Map<String, dynamic> json) => Doctor(
     id: json['id'],
     nombre: json['nombre'],
@@ -24,6 +25,7 @@ class Doctor {
     identificacion: json['identificacion'],
   );
 
+  // Trnasformar objeto a JSON
   Map<String, dynamic> toJson() => {
     'nombre': nombre,
     'apellido': apellido,

@@ -110,4 +110,31 @@ class CitaData {
       throw Exception('Error al obtener citas del doctor');
     }
   }
+
+  // 6. Obtener citas por fecha exacta (sin importar estado ni doctor)
+  Future<List<Cita>> fetchCitasPorFecha(DateTime fecha) async {
+    final response = await http.get(Uri.parse('$baseUrl/citas'));
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      final List citas = decoded['body']['data'];
+
+      final List citasFiltradas = citas.where((cita) {
+        final fechaCita = DateTime.parse(cita['fecha_hora']);
+        return fechaCita.year == fecha.year &&
+            fechaCita.month == fecha.month &&
+            fechaCita.day == fecha.day;
+      }).toList();
+
+      citasFiltradas.sort((a, b) {
+        final DateTime fechaA = DateTime.parse(a['fecha_hora']);
+        final DateTime fechaB = DateTime.parse(b['fecha_hora']);
+        return fechaA.compareTo(fechaB); // más antigua primero
+      });
+
+      return citasFiltradas.map((e) => Cita.fromJson(e)).toList();
+    } else {
+      throw Exception('Error al obtener citas por fecha');
+    }
+  }
 }

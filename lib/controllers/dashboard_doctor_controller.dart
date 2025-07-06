@@ -14,6 +14,10 @@ class DashboardDoctorController {
         icon: Icon(Icons.calendar_today),
         label: Text('Citas'),
       ),
+      NavigationRailDestination(
+        icon: Icon(Icons.attach_money),
+        label: Text('Pagos'),
+      ),
     ];
   }
 
@@ -26,6 +30,7 @@ class DashboardDoctorController {
           child: Text('Menú', style: TextStyle(color: Colors.white, fontSize: 24)),
         ),
         _drawerItem(Icons.calendar_today, 'Citas', 0, onSelect),
+        _drawerItem(Icons.attach_money, 'Pagos', 1, onSelect), // Nuevo ítem
       ],
     );
   }

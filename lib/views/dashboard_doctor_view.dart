@@ -4,6 +4,8 @@ import 'package:podologia_sana/data/doctor_data.dart';
 import 'package:podologia_sana/models/doctor_model.dart';
 import 'dashboard_doctor/citas_view.dart';
 import '../../utils/colors.dart';
+import 'dashboard_doctor/pagos_view.dart';
+
 final idDoctor = 5; // ID del doctor para pruebas, cambiar según sea necesario
 
 class DashboardDoctorView extends StatefulWidget {
@@ -20,8 +22,10 @@ class _DashboardDoctorViewState extends State<DashboardDoctorView> {
   bool isLoading = true;
 
   final List<Widget> _pages = const [
-    CitasView("Luis Quispe")
+    CitasView("Luis Quispe"),
+    PagosView(), // Nuevo
   ];
+
 
   @override
   void initState() {

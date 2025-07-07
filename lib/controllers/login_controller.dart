@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:podologia_sana/views/dashboard_doctor_view.dart';
 import 'dart:async';
 import '../views/dashboard_admin_view.dart';
 import '../data/usuario_data.dart';
@@ -34,7 +35,10 @@ class LoginController {
       if (loggedUser.rol.toLowerCase() == 'administrador') {
         _navigateWithSlideAnimation(context, const DashboardAdminView());
       } else if (loggedUser.rol.toLowerCase() == 'doctor') {
-        //_navigateWithSlideAnimation(context, const DashboardDoctoraView());
+        _navigateWithSlideAnimation(
+          context,
+          DashboardDoctorView(idDoctor: loggedUser.idDoctor ?? 1),
+        );
       } else {
         _showErrorDialog(context, 'Rol no reconocido: ${loggedUser.rol}');
       }

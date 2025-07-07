@@ -78,11 +78,11 @@ class ProductoData {
   }
 
   Future<void> deleteProducto(int id) async {
-    final url = '$baseUrl/$id';
-    final response = await http.delete(Uri.parse(url));
+    final response = await http.delete(Uri.parse('$baseUrl/producto/$id'));
 
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Error al eliminar producto');
     }
   }
+
 }

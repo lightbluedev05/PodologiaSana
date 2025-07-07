@@ -12,4 +12,8 @@ class CategoriaController {
     final categorias = await obtenerCategorias();
     return categorias.map((cat) => cat.nombre).toList();
   }
+  /*
+  Future<void> crearCategoria({required String codigo, required String nombre}) async {
+    await _data.createCategoria(codigo, nombre);
+  }*/
 }

@@ -62,16 +62,6 @@ class _ProductosViewState extends State<ProductosView> {
                     icon: const Icon(Icons.category),
                     label: const Text("+CATEGORIAS"),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    onPressed: controller.selectedIds.isEmpty
-                        ? null
-                        : () async => controller.deleteSelected(),
-                    icon: const Icon(Icons.delete),
-                    label: const Text("Eliminar"),
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red),
-                  ),
                 ],
               ),
             ),
@@ -80,22 +70,27 @@ class _ProductosViewState extends State<ProductosView> {
                 itemCount: controller.filteredProductos.length,
                 itemBuilder: (context, index) {
                   final producto = controller.filteredProductos[index];
-                  final isSelected = controller.selectedIds.contains(producto.id);
 
                   return Card(
                     margin:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     child: ListTile(
-                      leading: Checkbox(
-                        value: isSelected,
-                        onChanged: (_) => controller.toggleSelection(producto.id),
-                      ),
                       title: Text(producto.nombre),
                       subtitle: Text(
                           'Categoría: ${producto.categoria} | Stock: ${producto.stock} | Precio: S/. ${producto.precio_venta.toStringAsFixed(2)}'),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _showFormDialog(context, producto: producto),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => _showFormDialog(context, producto: producto),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            color: Colors.red,
+                            onPressed: () => _showDeleteConfirmDialog(context, producto),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -105,6 +100,50 @@ class _ProductosViewState extends State<ProductosView> {
           ],
         );
       },
+    );
+  }
+
+  void _showDeleteConfirmDialog(BuildContext context, Producto producto) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Confirmar eliminación'),
+        content: Text('¿Estás seguro de que deseas eliminar el producto "${producto.nombre}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              print('Eliminando producto ID: ${producto.id}'); // <-- AQUÍ
+
+              try {
+                final controller = Provider.of<ProductosController>(context, listen: false);
+                await controller.deleteProductoById(producto.id);
+                if (mounted) Navigator.of(context).pop();
+              } catch (e) {
+                Navigator.of(context).pop();
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('Error'),
+                    content: Text(e.toString().replaceFirst('Exception: ', '')),
+                    actions: [
+                      TextButton(
+                        child: const Text('Cerrar'),
+                        onPressed: () => Navigator.of(context).pop(),
+                      )
+                    ],
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -290,12 +329,33 @@ class _ProductosViewState extends State<ProductosView> {
               ElevatedButton(
                 onPressed: _isFormValid()
                     ? () async {
-                  // ACÁ VA LA LOGICA PARA AÑADIR CATEGORÍA
+                  final codigo = codigoCtrl.text.trim();
+                  final nombre = nombreCtrl.text.trim();
 
-                  Navigator.of(context).pop();
+                  try {
+                    // await _categoriaController.crearCategoria(codigo: codigo, nombre: nombre);
+                    categorias = await _categoriaController.obtenerNombresCategorias();
+                    setState(() {}); // Recarga dropdown de categorías
+
+                    if (mounted) Navigator.of(context).pop();
+                  } catch (e) {
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Error'),
+                        content: Text(e.toString().replaceFirst('Exception: ', '')),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cerrar'),
+                          )
+                        ],
+                      ),
+                    );
+                  }
                 }
                     : null,
-                child: const Text('Guardar'),
+                child: const Text('Guardar'), // <- ESTA LÍNEA FALTABA
               ),
             ],
           );

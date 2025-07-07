@@ -19,6 +19,8 @@ class UsuarioData {
       final decoded = json.decode(response.body);
       final data = decoded['body']['usuario'];
 
+      print(data);
+
       return Usuario.fromJson(data);
     } else {
       throw Exception('Error al iniciar sesión');

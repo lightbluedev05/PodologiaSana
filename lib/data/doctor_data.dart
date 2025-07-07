@@ -62,12 +62,13 @@ class DoctorData {
     }
   }
 
-  Future<void> deleteDoctor(String id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/$id'));
+  Future<void> deleteDoctor(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/doctor/$id'));
     if (response.statusCode != 200) {
       throw Exception('Error al eliminar doctor');
     }
   }
+
 
   Future<Doctor> fetchDoctorById(int id) async {
     final response = await http.get(Uri.parse('$baseUrl/doctor/$id'));

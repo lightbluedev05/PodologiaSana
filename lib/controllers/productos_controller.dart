@@ -13,12 +13,16 @@ class ProductosController extends ChangeNotifier {
   Future<void> loadProductos() async {
     try {
       _productos = await _data.fetchProductos();
+
+      _productos = _productos.where((p) => p.estado?.toLowerCase() == 'activo').toList();
+
       filteredProductos = List.from(_productos);
       notifyListeners();
     } catch (e) {
       print("Error al cargar productos: $e");
     }
   }
+
 
   void filterProductos(String query) {
     final q = query.toLowerCase();
@@ -43,6 +47,7 @@ class ProductosController extends ChangeNotifier {
       precio_venta: precioVenta,
       stock: stock,
       categoria: categoria,
+      estado: "activo",
     );
     await _data.createProducto(nuevo);
     await loadProductos();
@@ -63,18 +68,17 @@ class ProductosController extends ChangeNotifier {
       precio_venta: precioVenta,
       stock: stock,
       categoria: categoria,
+      estado: "activo",
     );
     await _data.updateProducto(actualizado);
     await loadProductos();
   }
 
-  Future<void> deleteSelected() async {
-    for (var id in selectedIds) {
-      await _data.deleteProducto(id);
-    }
-    selectedIds.clear();
+  Future<void> deleteProductoById(int id) async {
+    await _data.deleteProducto(id);
     await loadProductos();
   }
+
 
   void toggleSelection(int id) {
     if (selectedIds.contains(id)) {

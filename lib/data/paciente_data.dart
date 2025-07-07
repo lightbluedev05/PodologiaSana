@@ -19,24 +19,34 @@ class PacienteData {
   }
 
   Future<void> createPaciente(Paciente paciente) async {
-    await http.post(
+    final response = await http.post(
       Uri.parse('$baseUrl/paciente'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(paciente.toJson()),
     );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Error al crear paciente');
+    }
   }
 
   Future<void> updatePaciente(String id, Paciente paciente) async {
-    await http.put(
-      Uri.parse('$baseUrl/$id'),
+    final response = await http.put(
+      Uri.parse('$baseUrl/paciente/$id'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(paciente.toJson()),
     );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al actualizar paciente');
+    }
   }
 
-  Future<void> deletePacientes(List<String> ids) async {
-    for (String id in ids) {
-      await http.delete(Uri.parse('$baseUrl/$id'));
+  Future<void> deletePaciente(String id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/paciente/$id'));
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al eliminar paciente');
     }
   }
 }

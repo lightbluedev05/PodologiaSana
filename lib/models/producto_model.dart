@@ -5,6 +5,7 @@ class Producto {
   double precio_venta;
   int stock;
   String categoria;
+  String estado;
 
   Producto({
     this.id = -1,
@@ -13,6 +14,7 @@ class Producto {
     required this.precio_venta,
     required this.stock,
     required this.categoria,
+    required this.estado,
   });
 
   factory Producto.fromJson(Map<String, dynamic> json) => Producto(
@@ -22,6 +24,7 @@ class Producto {
     precio_venta: json['precio_venta'].toDouble(),
     stock: json['stock'],
     categoria: json['categoria'],
+    estado: json['estado'],
   );
 
   Map<String, dynamic> toJson() => {
@@ -30,5 +33,6 @@ class Producto {
     'precio_venta': precio_venta,
     'stock': stock,
     'categoria': categoria,
+    'estado': estado,
   };
 }

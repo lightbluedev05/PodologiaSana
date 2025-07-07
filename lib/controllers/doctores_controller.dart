@@ -68,13 +68,11 @@ class DoctoresController extends ChangeNotifier {
     await loadDoctores();
   }
 
-  Future<void> deleteSelected() async {
-    for (var id in selectedIds) {
-      await _data.deleteDoctor(id);
-    }
-    selectedIds.clear();
+  Future<void> deleteById(int id) async {
+    await _data.deleteDoctor(id);
     await loadDoctores();
   }
+
 
   void toggleSelection(String id) {
     if (selectedIds.contains(id)) {

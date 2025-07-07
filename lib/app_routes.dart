@@ -3,7 +3,7 @@ import 'package:podologia_sana/views/login_view.dart';
 import 'package:podologia_sana/views/dashboard_admin_view.dart';
 import 'package:podologia_sana/views/dashboard_doctor_view.dart';
 import 'package:podologia_sana/views/dashboard_admin/estadisticasA_view.dart';
-import 'package:podologia_sana/views/recep_view.dar.dart';
+import 'package:podologia_sana/views/recep_view.dart';
 
 class AppRoutes {
   static const String login = '/login';

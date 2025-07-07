@@ -6,18 +6,12 @@ class PacientesController extends ChangeNotifier {
   final PacienteData _data = PacienteData();
   List<Paciente> _pacientes = [];
   List<Paciente> filteredPacientes = [];
+  List<String> selectedIds = [];
 
   Future<void> loadPacientes() async {
     print("pacientes_controller: loadPacientes called");
     _pacientes = await _data.fetchPacientes();
     print("fetched pacientes");
-
-    // Imprimir todos los pacientes con sus datos legibles
-    for (var p in _pacientes) {
-      print(
-          'Paciente: ${p.nombre} ${p.apellido}, ID: ${p.identificacion}, Tel: ${p.telefono}, Correo: ${p.correo}');
-    }
-
     filteredPacientes = List.from(_pacientes);
     notifyListeners();
   }
@@ -32,6 +26,15 @@ class PacientesController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleSelection(String id) {
+    if (selectedIds.contains(id)) {
+      selectedIds.remove(id);
+    } else {
+      selectedIds.add(id);
+    }
+    notifyListeners();
+  }
+
   Future<void> addPaciente(Paciente paciente) async {
     await _data.createPaciente(paciente);
     await loadPacientes();
@@ -42,8 +45,9 @@ class PacientesController extends ChangeNotifier {
     await loadPacientes();
   }
 
-  Future<void> deletePaciente(String id) async {
-    await _data.deletePaciente(id);
+  Future<void> deleteSelected() async {
+    await _data.deletePacientes(selectedIds);
+    selectedIds.clear();
     await loadPacientes();
   }
 }

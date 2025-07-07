@@ -30,41 +30,26 @@ class Paciente {
     required this.tipoPie,
     required this.peso,
     required this.altura,
-    required this.alergias,
+    required this.alergias
   });
 
-  factory Paciente.fromJson(Map<String, dynamic> json) {
-    // Separar nombre y apellido del campo "paciente"
-    String nombreCompleto = json['paciente'] ?? '';
-    List<String> partes = nombreCompleto.split(' ');
-    String nombre = partes.isNotEmpty ? partes.first : '';
-    String apellido = partes.length > 1 ? partes.sublist(1).join(' ') : '';
-
-    // Separar ubicación
-    String ubicacion = json['ubicacion'] ?? '';
-    List<String> ubicacionPartes = ubicacion.split('-');
-    String departamento = ubicacionPartes.length > 0 ? ubicacionPartes[0] : '';
-    String provincia = ubicacionPartes.length > 1 ? ubicacionPartes[1] : '';
-    String distrito = ubicacionPartes.length > 2 ? ubicacionPartes[2] : '';
-
-    return Paciente(
-      numeroHistoria: json['numero_historia'] ?? -1,
-      nombre: nombre,
-      apellido: apellido,
-      tipoIdentificacion: json['identificacion'] ?? '',
-      identificacion: json['identificacion'] ?? '',
-      telefono: json['telefono'] ?? '',
-      correo: json['correo'] ?? '',
-      distrito: distrito,
-      departamento: departamento,
-      provincia: provincia,
-      direccion: json['direccion'] ?? '',
-      tipoPie: json['tipo_pie'] ?? '',
-      peso: (json['peso'] ?? 0).toDouble(),
-      altura: (json['altura'] ?? 0).toDouble(),
-      alergias: json['alergias'] ?? '',
-    );
-  }
+  factory Paciente.fromJson(Map<String, dynamic> json) => Paciente(
+    numeroHistoria: json['numero_historia'],
+    nombre: json['nombre'],
+    apellido: json['apellido'],
+    tipoIdentificacion: json['tipo_identificacion'],
+    identificacion: json['identificacion'],
+    telefono: json['telefono'],
+    correo: json['correo'],
+    distrito: json['distrito'],
+    departamento: json['departamento'],
+    provincia: json['provincia'],
+    direccion: json['direccion'],
+    tipoPie: json['tipo_pie'],
+    peso: json['peso'],
+    altura: json['altura'],
+    alergias: json['alergias']
+  );
 
   Map<String, dynamic> toJson() => {
     'nombre': nombre,
@@ -80,6 +65,6 @@ class Paciente {
     'tipo_pie': tipoPie,
     'peso': peso,
     'altura': altura,
-    'alergias': alergias,
+    'alergias': alergias
   };
 }

@@ -49,6 +49,16 @@ class _PacientesViewState extends State<PacientesView> {
                     icon: const Icon(Icons.add),
                     label: const Text("Nuevo"),
                   ),
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
+                    onPressed: controller.selectedIds.isEmpty
+                        ? null
+                        : () async => controller.deleteSelected(),
+                    icon: const Icon(Icons.delete),
+                    label: const Text("Eliminar"),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red),
+                  ),
                 ],
               ),
             ),
@@ -57,27 +67,24 @@ class _PacientesViewState extends State<PacientesView> {
                 itemCount: controller.filteredPacientes.length,
                 itemBuilder: (context, index) {
                   final paciente = controller.filteredPacientes[index];
+                  final isSelected =
+                  controller.selectedIds.contains(paciente.identificacion);
 
                   return Card(
                     margin: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 6),
                     child: ListTile(
+                      leading: Checkbox(
+                        value: isSelected,
+                        onChanged: (_) =>
+                            controller.toggleSelection(paciente.identificacion),
+                      ),
                       title: Text('${paciente.nombre} ${paciente.apellido}'),
                       subtitle: Text('ID: ${paciente.identificacion}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () =>
-                                _showFormDialog(context, paciente: paciente),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            color: Colors.red,
-                            onPressed: () => _showDeleteConfirmDialog(context, paciente),
-                          ),
-                        ],
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () =>
+                            _showFormDialog(context, paciente: paciente),
                       ),
                     ),
                   );
@@ -87,48 +94,6 @@ class _PacientesViewState extends State<PacientesView> {
           ],
         );
       },
-    );
-  }
-
-  void _showDeleteConfirmDialog(BuildContext context, Paciente paciente) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Confirmar eliminación'),
-        content: Text('¿Estás seguro de que deseas eliminar al paciente "${paciente.nombre} ${paciente.apellido}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                final controller = Provider.of<PacientesController>(context, listen: false);
-                await controller.deletePaciente(paciente.identificacion);
-                if (mounted) Navigator.of(context).pop();
-              } catch (e) {
-                Navigator.of(context).pop();
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('Error'),
-                    content: Text(e.toString().replaceFirst('Exception: ', '')),
-                    actions: [
-                      TextButton(
-                        child: const Text('Cerrar'),
-                        onPressed: () => Navigator.of(context).pop(),
-                      )
-                    ],
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -156,107 +121,92 @@ class _PacientesViewState extends State<PacientesView> {
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(isEdit ? 'Editar Paciente' : 'Nuevo Paciente'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: nombreCtrl,
-                  decoration: const InputDecoration(labelText: 'Nombre')),
-              TextField(controller: apellidoCtrl,
-                  decoration: const InputDecoration(labelText: 'Apellido')),
-              TextField(controller: tipoIdentificacionCtrl,
-                  decoration: const InputDecoration(
-                      labelText: 'Tipo Identificación')),
-              TextField(controller: identificacionCtrl,
-                  decoration: const InputDecoration(
-                      labelText: 'Identificación')),
-              TextField(controller: telefonoCtrl,
-                  decoration: const InputDecoration(labelText: 'Teléfono')),
-              TextField(controller: correoCtrl,
-                  decoration: const InputDecoration(labelText: 'Correo')),
-              TextField(controller: direccionCtrl,
-                  decoration: const InputDecoration(
-                      labelText: 'Dirección')),
-              TextField(controller: distritoCtrl,
-                  decoration: const InputDecoration(labelText: 'Distrito')),
-              TextField(controller: provinciaCtrl,
-                  decoration: const InputDecoration(
-                      labelText: 'Provincia')),
-              TextField(controller: departamentoCtrl,
-                  decoration: const InputDecoration(
-                      labelText: 'Departamento')),
-              TextField(controller: tipoPieCtrl,
-                  decoration: const InputDecoration(
-                      labelText: 'Tipo de Pie')),
-              TextField(
-                controller: pesoCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Peso (kg)'),
+      builder: (_) =>
+          AlertDialog(
+            title: Text(isEdit ? 'Editar Paciente' : 'Nuevo Paciente'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(controller: nombreCtrl,
+                      decoration: const InputDecoration(labelText: 'Nombre')),
+                  TextField(controller: apellidoCtrl,
+                      decoration: const InputDecoration(labelText: 'Apellido')),
+                  TextField(controller: tipoIdentificacionCtrl,
+                      decoration: const InputDecoration(
+                          labelText: 'Tipo Identificación')),
+                  TextField(controller: identificacionCtrl,
+                      decoration: const InputDecoration(
+                          labelText: 'Identificación')),
+                  TextField(controller: telefonoCtrl,
+                      decoration: const InputDecoration(labelText: 'Teléfono')),
+                  TextField(controller: correoCtrl,
+                      decoration: const InputDecoration(labelText: 'Correo')),
+                  TextField(controller: direccionCtrl,
+                      decoration: const InputDecoration(
+                          labelText: 'Dirección')),
+                  TextField(controller: distritoCtrl,
+                      decoration: const InputDecoration(labelText: 'Distrito')),
+                  TextField(controller: provinciaCtrl,
+                      decoration: const InputDecoration(
+                          labelText: 'Provincia')),
+                  TextField(controller: departamentoCtrl,
+                      decoration: const InputDecoration(
+                          labelText: 'Departamento')),
+                  TextField(controller: tipoPieCtrl,
+                      decoration: const InputDecoration(
+                          labelText: 'Tipo de Pie')),
+                  TextField(
+                    controller: pesoCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Peso (kg)'),
+                  ),
+                  TextField(
+                    controller: alturaCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Altura (cm)'),
+                  ),
+                  TextField(controller: alergiasCtrl,
+                      decoration: const InputDecoration(labelText: 'Alergias')),
+                ],
               ),
-              TextField(
-                controller: alturaCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Altura (cm)'),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancelar')),
+              ElevatedButton(
+                onPressed: () async {
+                  final nuevo = Paciente(
+                    numeroHistoria: paciente?.numeroHistoria ?? 0,
+                    nombre: nombreCtrl.text,
+                    apellido: apellidoCtrl.text,
+                    tipoIdentificacion: tipoIdentificacionCtrl.text,
+                    identificacion: identificacionCtrl.text,
+                    telefono: telefonoCtrl.text,
+                    correo: correoCtrl.text,
+                    direccion: direccionCtrl.text,
+                    distrito: distritoCtrl.text,
+                    provincia: provinciaCtrl.text,
+                    departamento: departamentoCtrl.text,
+                    tipoPie: tipoPieCtrl.text,
+                    peso: double.tryParse(pesoCtrl.text) ?? 0.0,
+                    altura: double.tryParse(alturaCtrl.text) ?? 0.0,
+                    alergias: alergiasCtrl.text,
+                  );
+
+                  if (isEdit) {
+                    await controller.updatePaciente(
+                        paciente!.identificacion, nuevo);
+                  } else {
+                    await controller.addPaciente(nuevo);
+                  }
+
+                  if (mounted) Navigator.of(context).pop();
+                },
+                child: const Text('Guardar'),
               ),
-              TextField(controller: alergiasCtrl,
-                  decoration: const InputDecoration(labelText: 'Alergias')),
             ],
           ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar')),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                final nuevo = Paciente(
-                  numeroHistoria: paciente?.numeroHistoria ?? 0,
-                  nombre: nombreCtrl.text,
-                  apellido: apellidoCtrl.text,
-                  tipoIdentificacion: tipoIdentificacionCtrl.text,
-                  identificacion: identificacionCtrl.text,
-                  telefono: telefonoCtrl.text,
-                  correo: correoCtrl.text,
-                  direccion: direccionCtrl.text,
-                  distrito: distritoCtrl.text,
-                  provincia: provinciaCtrl.text,
-                  departamento: departamentoCtrl.text,
-                  tipoPie: tipoPieCtrl.text,
-                  peso: double.tryParse(pesoCtrl.text) ?? 0.0,
-                  altura: double.tryParse(alturaCtrl.text) ?? 0.0,
-                  alergias: alergiasCtrl.text,
-                );
-
-                if (isEdit) {
-                  await controller.updatePaciente(
-                      paciente!.identificacion, nuevo);
-                } else {
-                  await controller.addPaciente(nuevo);
-                }
-
-                if (mounted) Navigator.of(context).pop();
-              } catch (e) {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('Error'),
-                    content: Text(e.toString().replaceFirst('Exception: ', '')),
-                    actions: [
-                      TextButton(
-                        child: const Text('Cerrar'),
-                        onPressed: () => Navigator.of(context).pop(),
-                      )
-                    ],
-                  ),
-                );
-              }
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:podologia_sana/views/login_view.dart';
 import '../models/producto_model.dart';
 import '../data/producto_data.dart';
 import '../views/dashboard_recep/registrar_ventas_view.dart';
+import '../app_routes.dart';
 
 class RecepcionistaController {
   static final RecepcionistaController _instance = RecepcionistaController._internal();
@@ -15,10 +16,7 @@ class RecepcionistaController {
   List<Producto> get productos => _productos;
 
   void volverAlLogin(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginView()),
-    );
+    Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
   }
 
   Future<void> cargarProductos() async {

@@ -4,6 +4,7 @@ import 'dart:async';
 import '../views/dashboard_admin_view.dart';
 import '../data/usuario_data.dart';
 import '../models/usuario_model.dart';
+import '../views/recep_view.dart';
 
 class LoginController {
   final TextEditingController emailController = TextEditingController();
@@ -38,6 +39,11 @@ class LoginController {
         _navigateWithSlideAnimation(
           context,
           DashboardDoctorView(idDoctor: loggedUser.idDoctor ?? 1),
+        );
+      } else if (loggedUser.rol.toLowerCase() == 'recepcionista') {
+        _navigateWithSlideAnimation(
+          context,
+          RecepcionistaView(),
         );
       } else {
         _showErrorDialog(context, 'Rol no reconocido: ${loggedUser.rol}');

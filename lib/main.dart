@@ -6,6 +6,7 @@ import 'package:podologia_sana/views/dashboard_admin/doctores_view.dart';
 import 'package:podologia_sana/controllers/pacientes_controller.dart';
 import 'package:podologia_sana/controllers/productos_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:podologia_sana/views/dashboard_admin/estadisticasA_view.dart';
 
 
 void main() {
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Podología Sana',
-      initialRoute: AppRoutes.dashboard_admin,
+      initialRoute: AppRoutes.Estadisticas_Screen,
       onGenerateRoute: AppRoutes.generateRoute,
       theme: ThemeData(
         textTheme: GoogleFonts.robotoTextTheme(),

@@ -137,4 +137,25 @@ class CitaData {
       throw Exception('Error al obtener citas por fecha');
     }
   }
+
+  Future<String> obtenerMotivoPorIdCita(int idCita) async {
+    final response = await http.get(Uri.parse('$baseUrl/citas'));
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      final List citas = decoded['body']['data'];
+      final cita = citas.firstWhere(
+            (c) => c['id_cita'] == idCita,
+        orElse: () => null,
+      );
+
+      if (cita != null) {
+        return cita['motivo'] ?? 'Sin motivo';
+      } else {
+        throw Exception('No se encontró la cita con ID $idCita');
+      }
+    } else {
+      throw Exception('Error al obtener las citas');
+    }
+  }
 }

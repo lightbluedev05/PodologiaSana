@@ -1,126 +1,67 @@
 import 'package:flutter/material.dart';
+import '../../data/atencion_data.dart';
+import '../../models/atencion_model.dart';
 
 class PagosView extends StatefulWidget {
-  const PagosView({super.key});
+  final String nombreDoctor;
+  final int idDoctor;
+
+  const PagosView(this.nombreDoctor, {super.key, required this.idDoctor});
 
   @override
   State<PagosView> createState() => _PagosViewState();
 }
 
 class _PagosViewState extends State<PagosView> {
-  // Datos de ejemplo - reemplaza con tu fuente de datos real
-  final List<AtencionPago> atenciones = [
-    AtencionPago(
-      nombrePaciente: "María García López",
-      fechaAtencion: DateTime(2024, 7, 15),
-      totalPago: 150.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Carlos Rodríguez Vega",
-      fechaAtencion: DateTime(2024, 7, 18),
-      totalPago: 200.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Ana Martínez Silva",
-      fechaAtencion: DateTime(2024, 6, 22),
-      totalPago: 175.50,
-    ),
-    AtencionPago(
-      nombrePaciente: "Luis Fernando Castro",
-      fechaAtencion: DateTime(2024, 7, 25),
-      totalPago: 300.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Isabel Morales Ruiz",
-      fechaAtencion: DateTime(2024, 7, 28),
-      totalPago: 125.00,
-    ),    AtencionPago(
-      nombrePaciente: "María García López",
-      fechaAtencion: DateTime(2024, 7, 15),
-      totalPago: 150.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Carlos Rodríguez Vega",
-      fechaAtencion: DateTime(2024, 7, 18),
-      totalPago: 200.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Ana Martínez Silva",
-      fechaAtencion: DateTime(2024, 6, 22),
-      totalPago: 175.50,
-    ),
-    AtencionPago(
-      nombrePaciente: "Luis Fernando Castro",
-      fechaAtencion: DateTime(2024, 7, 25),
-      totalPago: 300.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Isabel Morales Ruiz",
-      fechaAtencion: DateTime(2024, 7, 28),
-      totalPago: 125.00,
-    ),    AtencionPago(
-      nombrePaciente: "María García López",
-      fechaAtencion: DateTime(2024, 7, 15),
-      totalPago: 150.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Carlos Rodríguez Vega",
-      fechaAtencion: DateTime(2024, 7, 18),
-      totalPago: 200.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Ana Martínez Silva",
-      fechaAtencion: DateTime(2024, 6, 22),
-      totalPago: 175.50,
-    ),
-    AtencionPago(
-      nombrePaciente: "Luis Fernando Castro",
-      fechaAtencion: DateTime(2024, 7, 25),
-      totalPago: 300.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Isabel Morales Ruiz",
-      fechaAtencion: DateTime(2024, 7, 28),
-      totalPago: 125.00,
-    ),    AtencionPago(
-      nombrePaciente: "María García López",
-      fechaAtencion: DateTime(2024, 7, 15),
-      totalPago: 150.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Carlos Rodríguez Vega",
-      fechaAtencion: DateTime(2024, 7, 18),
-      totalPago: 200.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Ana Martínez Silva",
-      fechaAtencion: DateTime(2024, 6, 22),
-      totalPago: 175.50,
-    ),
-    AtencionPago(
-      nombrePaciente: "Luis Fernando Castro",
-      fechaAtencion: DateTime(2024, 7, 25),
-      totalPago: 300.00,
-    ),
-    AtencionPago(
-      nombrePaciente: "Isabel Morales Ruiz",
-      fechaAtencion: DateTime(2024, 7, 28),
-      totalPago: 125.00,
-    ),
-  ];
+  final List<AtencionPago> atenciones = [];
+  bool isLoading = true; // Estado de carga
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAtenciones();
+  }
+
+  Future<void> fetchAtenciones() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final lista = await AtencionData().fetchAtencionesPorDoctor(widget.idDoctor);
+      final listaConvertida = lista.map((a) => AtencionPago.fromAtencion(a)).toList();
+
+      // DEBUG: Mostrar fechas
+      final ahora = DateTime.now();
+      print('Fecha actual: $ahora');
+      for (var a in listaConvertida) {
+        print('Fecha atención: ${a.fechaAtencion}');
+      }
+
+      setState(() {
+        atenciones.clear();
+        atenciones.addAll(listaConvertida);
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error al cargar atenciones: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   double get totalRecaudado {
-    return atenciones
-        .fold(0.0, (sum, atencion) => sum + atencion.totalPago);
+    return atenciones.fold(0.0, (sum, a) => sum + a.totalPago);
   }
 
   double get totalMesActual {
     final ahora = DateTime.now();
     return atenciones
-        .where((atencion) =>
-    atencion.fechaAtencion.year == ahora.year &&
-        atencion.fechaAtencion.month == ahora.month)
-        .fold(0.0, (sum, atencion) => sum + atencion.totalPago);
+        .where((a) =>
+    a.fechaAtencion.year == ahora.year &&
+        a.fechaAtencion.month == ahora.month)
+        .fold(0.0, (sum, a) => sum + a.totalPago);
   }
 
   @override
@@ -175,15 +116,86 @@ class _PagosViewState extends State<PagosView> {
             ),
           ),
 
-          // Lista de atenciones
+          // Lista de atenciones o indicador de carga
           Expanded(
-            child: ListView.builder(
+            child: isLoading
+                ? _buildLoadingWidget()
+                : atenciones.isEmpty
+                ? _buildEmptyState()
+                : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: atenciones.length,
               itemBuilder: (context, index) {
                 final atencion = atenciones[index];
                 return _buildAtencionCard(atencion);
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 60,
+            height: 60,
+            child: CircularProgressIndicator(
+              strokeWidth: 4,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade600),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Cargando registros de pagos...',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Por favor espera un momento',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.receipt_long,
+            size: 80,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No hay registros de pagos',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Los pagos aparecerán aquí cuando se registren',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade500,
             ),
           ),
         ],
@@ -279,7 +291,6 @@ class _PagosViewState extends State<PagosView> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    // Monto total - con énfasis especial
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -319,7 +330,6 @@ class _PagosViewState extends State<PagosView> {
   }
 }
 
-// Modelo de datos para las atenciones
 class AtencionPago {
   final String nombrePaciente;
   final DateTime fechaAtencion;
@@ -330,4 +340,12 @@ class AtencionPago {
     required this.fechaAtencion,
     required this.totalPago,
   });
+
+  factory AtencionPago.fromAtencion(Atencion a) {
+    return AtencionPago(
+      nombrePaciente: a.nombrePaciente,
+      fechaAtencion: a.fechaAtencion,
+      totalPago: double.tryParse(a.total) ?? 0.0,
+    );
+  }
 }

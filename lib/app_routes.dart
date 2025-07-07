@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:podologia_sana/views/login_view.dart';
 import 'package:podologia_sana/views/dashboard_admin_view.dart';
 import 'package:podologia_sana/views/dashboard_doctor_view.dart';
+import 'package:podologia_sana/views/dashboard_admin/estadisticasA_view.dart';
 
 class AppRoutes {
   static const String login = '/login';
   static const String dashboard_admin = '/dashboard_admin';
   static const String doctores = '/doctores';
   static const String dashboard_doctor = '/dashboard_doctor';
+  static const String Estadisticas_Screen = "/EstadisticasScreen";
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -16,9 +18,11 @@ class AppRoutes {
       case dashboard_admin:
         return MaterialPageRoute(builder: (_) => const DashboardAdminView());
       case doctores:
-        return MaterialPageRoute(builder: (_) => const DashboardDoctorView());
+        return MaterialPageRoute(builder: (_) => const DashboardDoctorView(idDoctor: 5));
       case dashboard_doctor:
-        return MaterialPageRoute(builder: (_) => const DashboardDoctorView());
+        return MaterialPageRoute(builder: (_) => const DashboardDoctorView(idDoctor: 5));
+      case Estadisticas_Screen:
+        return MaterialPageRoute(builder: (_) => const EstadisticasScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

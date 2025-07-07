@@ -6,25 +6,22 @@ import 'dashboard_doctor/citas_view.dart';
 import '../../utils/colors.dart';
 import 'dashboard_doctor/pagos_view.dart';
 
-final idDoctor = 5; // ID del doctor para pruebas, cambiar según sea necesario
 
 class DashboardDoctorView extends StatefulWidget {
-  const DashboardDoctorView({super.key});
+  final int idDoctor;
+
+  const DashboardDoctorView({super.key, required this.idDoctor});
 
   @override
   State<DashboardDoctorView> createState() => _DashboardDoctorViewState();
 }
+
 
 class _DashboardDoctorViewState extends State<DashboardDoctorView> {
   final DashboardDoctorController _controller = DashboardDoctorController();
 
   Doctor? doctor;
   bool isLoading = true;
-
-  final List<Widget> _pages = const [
-    CitasView("Luis Quispe"),
-    PagosView(), // Nuevo
-  ];
 
 
   @override
@@ -35,7 +32,7 @@ class _DashboardDoctorViewState extends State<DashboardDoctorView> {
 
   Future<void> _loadDoctor() async {
     try {
-      Doctor d = await DoctorData().fetchDoctorById(5);
+      Doctor d = await DoctorData().fetchDoctorById(widget.idDoctor);
       setState(() {
         doctor = d;
         isLoading = false;
@@ -94,12 +91,15 @@ class _DashboardDoctorViewState extends State<DashboardDoctorView> {
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(24),
-                    child: _pages[_controller.currentIndex],
+                    child: [
+                      CitasView("${doctor!.nombre} ${doctor!.apellido}", idDoctor: doctor!.id),
+                      PagosView("${doctor!.nombre} ${doctor!.apellido}", idDoctor: doctor!.id),
+                    ][_controller.currentIndex],
                   ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

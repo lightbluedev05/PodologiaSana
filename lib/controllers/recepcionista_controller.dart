@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:podologia_sana/views/dashboard_admin/doctores_view.dart';
+import 'package:podologia_sana/views/dashboard_admin/pacientes_view.dart';
 import 'package:podologia_sana/views/login_view.dart';
 import '../models/producto_model.dart';
 import '../data/producto_data.dart';
@@ -63,7 +63,7 @@ class RecepcionistaController {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const PacientesView(),
+        builder: (context) => const PacientesViewxd(),
       ),
     );
   }
@@ -173,8 +173,8 @@ class ProcesarPagosView extends StatelessWidget {
   }
 }
 
-class PacientesView extends StatelessWidget {
-  const PacientesView({super.key});
+class PacientesViewxd extends StatelessWidget {
+  const PacientesViewxd({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +183,7 @@ class PacientesView extends StatelessWidget {
         title: const Text('Gestión de Pacientes'),
         backgroundColor: Colors.blue[700],
       ),
-      body: const DoctoresView(), 
+      body: const PacientesView(),
     );
   }
 }

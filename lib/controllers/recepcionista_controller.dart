@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:podologia_sana/views/dashboard_admin/doctores_view.dart';
 import 'package:podologia_sana/views/login_view.dart';
 import '../models/producto_model.dart';
 import '../data/producto_data.dart';
@@ -172,7 +173,6 @@ class ProcesarPagosView extends StatelessWidget {
   }
 }
 
-// Nueva vista de Pacientes - AQUÍ PONDRÁS LA LÓGICA DE PACIENTES
 class PacientesView extends StatelessWidget {
   const PacientesView({super.key});
 
@@ -183,13 +183,7 @@ class PacientesView extends StatelessWidget {
         title: const Text('Gestión de Pacientes'),
         backgroundColor: Colors.blue[700],
       ),
-      body: const Center(
-        child: Text(
-          'Pantalla de Gestión de Pacientes\n(Por implementar)',
-          style: TextStyle(fontSize: 18),
-          textAlign: TextAlign.center,
-        ),
-      ),
+      body: const DoctoresView(), 
     );
   }
 }

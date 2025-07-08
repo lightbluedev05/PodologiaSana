@@ -19,24 +19,21 @@ class PacienteData {
   }
 
   Future<void> createPaciente(Paciente paciente) async {
+    print("paciente_data: createPaciente called with ${paciente.toCreateJson()}");
     await http.post(
       Uri.parse('$baseUrl/paciente'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(paciente.toJson()),
+      body: jsonEncode(paciente.toCreateJson()),
     );
   }
 
   Future<void> updatePaciente(String id, Paciente paciente) async {
+    print("paciente_data: updatePaciente called with id $id and ${paciente.toUpdateJson()}");
+    print(jsonEncode(paciente.toUpdateJson()));
     await http.put(
-      Uri.parse('$baseUrl/$id'),
+      Uri.parse('$baseUrl/paciente/$id'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(paciente.toJson()),
+      body: jsonEncode(paciente.toUpdateJson()),
     );
-  }
-
-  Future<void> deletePacientes(List<String> ids) async {
-    for (String id in ids) {
-      await http.delete(Uri.parse('$baseUrl/$id'));
-    }
   }
 }

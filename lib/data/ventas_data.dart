@@ -10,6 +10,8 @@ class VentaData {
         Uri.parse('${baseUrl}/ventas?page=$page&limit=$limit')
     );
 
+    print('Código de estado: ${response.statusCode}');
+
     if (response.statusCode == 200) {
       final decoded = json.decode(response.body);
       final body = decoded['body'];
@@ -59,6 +61,8 @@ class VentaData {
     final response = await http.get(
         Uri.parse('$baseUrl/venta/$idVenta/detalles')
     );
+    print(Uri.parse('$baseUrl/venta/$idVenta/detalles'));
+    print('Código de estado detalleVenta: ${response.statusCode}');
 
     if (response.statusCode == 200) {
       final decoded = json.decode(response.body);

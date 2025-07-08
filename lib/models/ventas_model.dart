@@ -8,6 +8,7 @@ class Venta {
   String? nombrePaciente;
   String? apellidoPaciente;
   List<DetalleVenta>? detalles;
+  String? nombreCliente;  // Cambio: ahora nombreCliente
 
   Venta({
     this.id = -1,
@@ -19,20 +20,20 @@ class Venta {
     this.nombrePaciente,
     this.apellidoPaciente,
     this.detalles,
+    this.nombreCliente
   });
 
   // Leer a partir de un JSON
   factory Venta.fromJson(Map<String, dynamic> json) => Venta(
-    id: json['id'] ?? -1,
-    identificacion: json['identificacion'],
+    id: json['id_venta'] ?? -1,
+    identificacion: json['identificacion'] ?? '',
     tipoPago: json['tipo_pago'],
     codigoOperacion: json['codigo_operacion'],
     fechaVenta: json['fecha_venta'] ?? '',
     total: (json['total'] is String)
         ? double.parse(json['total'])
         : (json['total']?.toDouble() ?? 0.0),
-    nombrePaciente: json['nombre_paciente'],
-    apellidoPaciente: json['apellido_paciente'],
+    nombreCliente: json['nombre_cliente'],
   );
 
   // Transformar objeto a JSON para crear venta
@@ -67,9 +68,9 @@ class DetalleVenta {
 
   // Leer a partir de un JSON
   factory DetalleVenta.fromJson(Map<String, dynamic> json) => DetalleVenta(
-    id: json['id'] ?? -1,
+    id: json['id_detalle_venta'] ?? -1,
     idVenta: json['id_venta'] ?? -1,
-    idProducto: json['id_producto'],  // Cambio: ahora id_producto
+    idProducto: json['id_producto'] ?? -1,  // Cambio: ahora id_producto
     cantidad: json['cantidad'],
     precioUnitario: (json['precio_unitario'] is String)
         ? double.parse(json['precio_unitario'])
@@ -78,7 +79,7 @@ class DetalleVenta {
         ? double.parse(json['subtotal'])
         : (json['subtotal']?.toDouble() ?? 0.0),
     nombreProducto: json['nombre_producto'],
-    descripcionProducto: json['descripcion_producto'],
+    descripcionProducto: json['descripcion_producto'] ?? '',
   );
 
   // Transformar objeto a JSON para crear

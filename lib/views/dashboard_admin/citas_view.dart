@@ -24,6 +24,7 @@ class _AdminCitasViewState extends State<AdminCitasView> {
   final DoctorData _data = DoctorData();
   List<Doctor> doctores = [];
   Map<int, String> mapaDoctores = {};
+  Map<int, String> mapaDoctoresIDENTI = {};
   final PacienteData _dataPA = PacienteData();
   List<Paciente> pacientes = [];
   Map<int, String> mapaPacientes = {};
@@ -81,6 +82,10 @@ class _AdminCitasViewState extends State<AdminCitasView> {
         mapaDoctores = {
           for (var d in result)
             d.id: '${d.nombre ?? "[sin nombre]"} ${d.apellido ?? "[sin apellido]"}'
+        };
+        mapaDoctoresIDENTI = {
+          for (var d in result)
+            d.id: '${d.identificacion}'
         };
       });
 
@@ -150,11 +155,14 @@ class _AdminCitasViewState extends State<AdminCitasView> {
     int? doctorSeleccionadoId;
     String identificacionPaciente = '';
     String identificacionDoctor = '';
+
+    String? id_paciente;
+    String? id_doctor;
+
     String motivo = '';
     DateTime? fechaSeleccionada;
     TimeOfDay? horaSeleccionada;
     int tipoSeleccionado = 8; // Default: Consultorio
-    int estadoSeleccionado = 10; // Default: Pendiente
 
     final TextEditingController motivoController = TextEditingController();
     final TextEditingController identificacionPacienteController = TextEditingController();
@@ -233,15 +241,6 @@ class _AdminCitasViewState extends State<AdminCitasView> {
                           ),
                           onChanged: (valor) {
                             identificacionPaciente = valor;
-                            // Buscar paciente por identificación
-                            for (var paciente in pacientes) {
-                              if (paciente.paciente?.contains(valor) == true) {
-                                setDialogState(() {
-                                  pacienteSeleccionadoId = paciente.id_paciente;
-                                });
-                                break;
-                              }
-                            }
                           },
                         ),
                       ],
@@ -290,6 +289,7 @@ class _AdminCitasViewState extends State<AdminCitasView> {
                           onChanged: (nuevoId) {
                             setDialogState(() {
                               doctorSeleccionadoId = nuevoId;
+                              id_doctor = mapaDoctoresIDENTI[nuevoId.toString()];
                             });
                           },
                         ),
@@ -356,10 +356,12 @@ class _AdminCitasViewState extends State<AdminCitasView> {
                     // Fecha
                     GestureDetector(
                       onTap: () async {
+                        final DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
+
                         final pickedDate = await showDatePicker(
                           context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
+                          initialDate: tomorrow,
+                          firstDate: tomorrow,
                           lastDate: DateTime(2100),
                           locale: const Locale('es', 'ES'),
                           builder: (context, child) {
@@ -471,26 +473,34 @@ class _AdminCitasViewState extends State<AdminCitasView> {
             ),
             ElevatedButton.icon(
               onPressed: () {
-                final String fecha = '${fechaSeleccionada!.year.toString().padLeft(4, '0')}-'
+// Formatear solo la fecha (ejemplo: "2025-07-08")
+                final String fechaFormateada = '${fechaSeleccionada!.year.toString().padLeft(4, '0')}-'
                     '${fechaSeleccionada!.month.toString().padLeft(2, '0')}-'
                     '${fechaSeleccionada!.day.toString().padLeft(2, '0')}';
 
-                final String hora = '${horaSeleccionada!.hour.toString().padLeft(2, '0')}:'
+// Formatear solo la hora (ejemplo: "14:30")
+                final String horaFormateada = '${horaSeleccionada!.hour.toString().padLeft(2, '0')}:'
                     '${horaSeleccionada!.minute.toString().padLeft(2, '0')}';
 
-                Navigator.pop(context);
+// Debug
+                print('==== DEBUG - DATOS DE LA CITA A CREAR ====');
+                print('TipoCita: ${tipoSeleccionado == 8 ? 'Consultorio' : 'Domicilio'}');
+                print('ID Paciente: ${identificacionPaciente}');
+                print('ID Doctor: ${id_doctor}');
+                print('Motivo: $motivo');
+                print('Fecha: $fechaFormateada');
+                print('Hora: $horaFormateada');
+                print(mapaDoctoresIDENTI);
+                id_doctor = mapaDoctoresIDENTI[doctorSeleccionadoId];
+                print(id_doctor);
+
+// Llamada
                 crearCita(
                   TipoCita: tipoSeleccionado == 8 ? 'Consultorio' : 'Domicilio',
-                  idPaciente: pacienteSeleccionadoId!.toString(),
-                  fecha: fechaSeleccionada!,
-                  hora: DateTime(
-                    fechaSeleccionada!.year,
-                    fechaSeleccionada!.month,
-                    fechaSeleccionada!.day,
-                    horaSeleccionada!.hour,
-                    horaSeleccionada!.minute,
-                  ),
-                  idDoctor: doctorSeleccionadoId!.toString(),
+                  idPaciente: identificacionPaciente!.toString(),
+                  fecha: fechaFormateada,
+                  hora: horaFormateada,
+                  idDoctor: id_doctor!.toString(),
                   motivo: motivo,
                 );
               },
@@ -512,8 +522,8 @@ class _AdminCitasViewState extends State<AdminCitasView> {
   void crearCita({
     required String TipoCita,
     required String idPaciente,
-    required DateTime fecha,
-    required DateTime hora,
+    required String fecha,
+    required String hora,
     required String idDoctor,
     required String motivo,
   }) async {

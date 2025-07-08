@@ -195,25 +195,35 @@ class CitaData {
   // MÉTODOS CRUD PARA ADMIN
 
   // 7. Crear nueva cita
-  Future<bool> createCita(String tipo_cita, String id_paciente, String id_doctor ,DateTime fecha, DateTime hora, String motivo) async {
+  Future<bool> createCita(
+      String tipo_cita,
+      String id_paciente,
+      String id_doctor,
+      String fecha,
+      String hora,
+      String motivo,
+      ) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/citas'),
+      Uri.parse('$baseUrl/cita'),
       headers: {
         'Content-Type': 'application/json',
       },
       body: json.encode({
         'tipo_cita': tipo_cita,
-        'consultrio': "101",
-        'iden_paciente': id_paciente,
-        'iden_doctor': id_doctor,
-        'fecha': fecha.toIso8601String(),
-        'hora': hora.toIso8601String(),
+        'consultorio': "101", // ← corregido
+        'ident_paciente': id_paciente, // ← corregido
+        'ident_doctor': id_doctor,     // ← corregido
+        'fecha': fecha,
+        'hora': hora,
         'motivo': motivo,
       }),
     );
 
+    print('🔁 Solicitud enviada: ${response.body}'); // Debug extra
+
     return response.statusCode == 200 || response.statusCode == 201;
   }
+
 
   // 8. Actualizar cita existente
   Future<bool> updateCita(int id, int idTipoCita, int idPaciente, int idConsultorio, String fecha, String hora, String motivo, int tipo, int idDoctor) async {

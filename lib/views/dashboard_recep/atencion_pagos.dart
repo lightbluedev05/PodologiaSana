@@ -5,6 +5,8 @@ import '../../data/atencion_data.dart';
 import '../../models/citas_model.dart';
 import '../../models/doctor_model.dart';
 import '../../data/doctor_data.dart';
+import '../../models/paciente_model.dart';
+import '../../data/paciente_data.dart';
 
 class AtencionPagosView extends StatefulWidget {
   const AtencionPagosView({super.key});
@@ -20,12 +22,15 @@ class _AtencionPagosViewState extends State<AtencionPagosView> {
   final AtencionData _atencionData = AtencionData();
   List<Doctor> doctores = [];
   Map<int, String> mapaDoctores = {};
-
+  final PacienteData _dataPA = PacienteData();
+  List<Paciente> pacientes = [];
+  Map<String, int> mapaPacientes = {};
   @override
   void initState() {
     super.initState();
     _loadCitasHoy();
     _loadDoctores();
+    _loadPacientes();
   }
 
   Future<void> _loadCitasHoy() async {
@@ -65,7 +70,48 @@ class _AtencionPagosViewState extends State<AtencionPagosView> {
       print('Error al cargar doctores: $e');
     }
   }
+  Future<void> _loadPacientes() async {
+    print('⏳ Iniciando carga de pacientes...');
 
+    try {
+      final result = await _dataPA.fetchPacientes();
+
+      print('✅ Pacientes recibidos: ${result.length}');
+      for (var p in result) {
+        print('🧍 Paciente: id=${p.id_paciente}, nombre=${p.paciente}');
+      }
+
+      if (!mounted) {
+        print('⚠️ El widget ya no está montado, se cancela setState');
+        return;
+      }
+
+      setState(() {
+        pacientes = result;
+        mapaPacientes = {
+          for (var p in result)
+            p.paciente: p.id_paciente
+        };
+        print("------------------------------------------------");
+        print(mapaPacientes);
+        print("------------------------------------------------");
+      });
+
+      print('🎯 Pacientes cargados y mapeados exitosamente');
+    } catch (e, stackTrace) {
+      print('❌ Error al cargar pacientes: $e');
+      print('🔍 StackTrace: $stackTrace');
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al cargar la lista de pacientes'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
   String _formatearFecha(DateTime fecha) {
     return '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year}';
   }
@@ -448,10 +494,6 @@ class _PagoDialog extends StatefulWidget {
 class _PagoDialogState extends State<_PagoDialog> {
   final _formKey = GlobalKey<FormState>();
   final _totalController = TextEditingController();
-  final _pesoController = TextEditingController();
-  final _alturaController = TextEditingController();
-  final _diagnosticoController = TextEditingController();
-  final _observacionesController = TextEditingController();
   final _codigoOperacionController = TextEditingController();
   final _direccionController = TextEditingController();
 
@@ -473,10 +515,6 @@ class _PagoDialogState extends State<_PagoDialog> {
   @override
   void dispose() {
     _totalController.dispose();
-    _pesoController.dispose();
-    _alturaController.dispose();
-    _diagnosticoController.dispose();
-    _observacionesController.dispose();
     _codigoOperacionController.dispose();
     _direccionController.dispose();
     super.dispose();
@@ -497,8 +535,8 @@ class _PagoDialogState extends State<_PagoDialog> {
       );
 
       final success = await AtencionData().crearAtencion(
-        idPaciente: 1, // Este valor debería venir del sistema de pacientes
-        idHistorial: 1, // Este valor debería venir del historial médico
+        idPaciente: 78512349,
+        idHistorial: 4,
         idAtencion: widget.cita.id,
         tipoAtencion: widget.cita.tipo.toLowerCase() == 'consultorio' ? 1 : 2,
         consultorio: widget.cita.tipo.toLowerCase() == 'consultorio' ? 1 : 0,
@@ -507,18 +545,10 @@ class _PagoDialogState extends State<_PagoDialog> {
             : null,
         fechaAtencion: DateTime.now(),
         idDoctor: doctor.id,
-        diagnostico: _diagnosticoController.text.isNotEmpty
-            ? _diagnosticoController.text
-            : null,
-        observaciones: _observacionesController.text.isNotEmpty
-            ? _observacionesController.text
-            : null,
-        peso: _pesoController.text.isNotEmpty
-            ? _pesoController.text
-            : null,
-        altura: _alturaController.text.isNotEmpty
-            ? _alturaController.text
-            : null,
+        diagnostico: null,
+        observaciones: null,
+        peso: null,
+        altura: null,
         total: _totalController.text,
         idTipoPago: _tipoPagoSeleccionado,
         codigoOperacion: _tipoPagoSeleccionado == 2 && _codigoOperacionController.text.isNotEmpty
@@ -629,80 +659,6 @@ class _PagoDialogState extends State<_PagoDialog> {
             },
           ),
         ],
-
-        // Datos adicionales médicos
-        const SizedBox(height: 20),
-        Text(
-          'Datos Médicos (Opcional)',
-          style: GoogleFonts.roboto(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF2C3E50),
-          ),
-        ),
-        const SizedBox(height: 15),
-
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _pesoController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Peso (kg)',
-                  hintText: 'Ej: 70',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  prefixIcon: const Icon(Icons.monitor_weight),
-                ),
-              ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: TextFormField(
-                controller: _alturaController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Altura (cm)',
-                  hintText: 'Ej: 170',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  prefixIcon: const Icon(Icons.height),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 15),
-
-        TextFormField(
-          controller: _diagnosticoController,
-          decoration: InputDecoration(
-            labelText: 'Diagnóstico',
-            hintText: 'Ingrese el diagnóstico',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            prefixIcon: const Icon(Icons.medical_information),
-          ),
-          maxLines: 2,
-        ),
-        const SizedBox(height: 15),
-
-        TextFormField(
-          controller: _observacionesController,
-          decoration: InputDecoration(
-            labelText: 'Observaciones',
-            hintText: 'Ingrese observaciones adicionales',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            prefixIcon: const Icon(Icons.notes),
-          ),
-          maxLines: 3,
-        ),
       ],
     );
   }

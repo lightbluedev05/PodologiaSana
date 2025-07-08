@@ -37,7 +37,6 @@ class AtencionData {
     }
   }
 
-  // 2. Obtener atenciones filtradas por ID del doctor
   Future<List<Atencion>> fetchAtencionesPorDoctor(int idDoctor) async {
     final response = await http.get(Uri.parse('$baseUrl/atencion'));
 
@@ -101,27 +100,33 @@ class AtencionData {
     }
   }
   Future<bool> crearAtencion({
-    required int idPaciente,
-    required int idHistorial,
-    required int idAtencion,
-    required int tipoAtencion,
-    required int consultorio,
+    int? idPaciente,
+    int? idHistorial,
+    int? idAtencion,
+    int tipoAtencion = 1,
+    int consultorio = 101,
     String? direccionDomicilio,
-    required DateTime fechaAtencion,
-    required int idDoctor,
+    DateTime? fechaAtencion,
+    int? idDoctor,
     String? diagnostico,
     String? observaciones,
     String? peso,
     String? altura,
-    required String total,
-    required int idTipoPago,
+    String total = '0',
+    int idTipoPago = 1,
     String? codigoOperacion,
   }) async {
+    // Validación mínima opcional
+    if (idPaciente == null || idDoctor == null || fechaAtencion == null) {
+      print('❌ Faltan datos obligatorios: paciente, doctor o fecha.');
+      return false;
+    }
+
     final url = Uri.parse('$baseUrl/atencion');
 
     final Map<String, dynamic> data = {
-      'id_paciente': idPaciente,
-      'id_historial': idHistorial,
+      'id_paciente': 11,
+      'id_historial': 4,
       'id_atencion': idAtencion,
       'tipo_atencion': tipoAtencion,
       'consultorio': consultorio,
@@ -146,10 +151,6 @@ class AtencionData {
     print('Código de estado (crear atencion): ${response.statusCode}');
     print('Respuesta: ${response.body}');
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return true;
-    } else {
-      return false;
-    }
+    return response.statusCode == 200 || response.statusCode == 201;
   }
 }

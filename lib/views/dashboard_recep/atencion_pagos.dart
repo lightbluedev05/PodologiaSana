@@ -497,7 +497,7 @@ class _PagoDialogState extends State<_PagoDialog> {
   final _codigoOperacionController = TextEditingController();
   final _direccionController = TextEditingController();
 
-  int _tipoPagoSeleccionado = 1; // 1: Efectivo, 2: Transferencia, etc.
+  int _tipoPagoSeleccionado = 1;
   bool _isProcessing = false;
   int _currentStep = 0;
 
@@ -506,9 +506,8 @@ class _PagoDialogState extends State<_PagoDialog> {
   @override
   void initState() {
     super.initState();
-    // Si es domicilio, mostrar campo de dirección
     if (widget.cita.tipo.toLowerCase() == 'domicilio') {
-      _direccionController.text = ''; // Aquí podrías obtener la dirección del paciente
+      _direccionController.text = '';
     }
   }
 

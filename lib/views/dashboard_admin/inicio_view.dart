@@ -56,18 +56,6 @@ class _InicioViewState extends State<InicioView> {
     return _eventos[DateTime(day.year, day.month, day.day)] ?? [];
   }
 
-  final List<String> pacientesRecientes = [
-    'Marta Soto',
-    'Javier Luna',
-    'Carmen Ruiz',
-  ];
-
-  final Map<String, int> estadisticas = {
-    'Citas Hoy': 6,
-    'Citas Semana': 18,
-    'Pacientes Nuevos': 4,
-  };
-
   @override
   Widget build(BuildContext context) {
     if (_cargando) {
@@ -96,14 +84,12 @@ class _InicioViewState extends State<InicioView> {
                   children: [
                     _buildCitasDelDia(),
                     const SizedBox(height: 16),
-                    _buildPacientesRecientes(),
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          _buildEstadisticas(),
         ],
       ),
     );
@@ -450,129 +436,6 @@ class _InicioViewState extends State<InicioView> {
             )),
         ],
       ),
-    );
-  }
-
-  Widget _buildPacientesRecientes() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.people, color: Colors.green.shade600, size: 20),
-              const SizedBox(width: 8),
-              const Text(
-                'Pacientes Recientes',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...pacientesRecientes.map((paciente) => Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.green.shade200),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Colors.green.shade200,
-                  child: Text(
-                    paciente.substring(0, 1).toUpperCase(),
-                    style: TextStyle(
-                      color: Colors.green.shade700,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    paciente,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEstadisticas() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: estadisticas.entries.map((e) {
-        return Expanded(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade400, Colors.blue.shade600],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Text(
-                  e.key,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  e.value.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 }

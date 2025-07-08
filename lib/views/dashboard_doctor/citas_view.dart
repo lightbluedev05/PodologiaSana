@@ -181,7 +181,7 @@ class _CitasViewState extends State<CitasView> with TickerProviderStateMixin {
     );
 
     try {
-      // Espera hasta que se carguen las atenciones
+
       await _cargarAtencionesDePaciente(nombrePaciente);
     } catch (e) {
       // Manejo de errores

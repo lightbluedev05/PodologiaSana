@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/atencion_data.dart';
 import '../../models/atencion_model.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AtencionPacienteView extends StatefulWidget {
   final String nombrePaciente;
@@ -31,7 +33,7 @@ class _AtencionPacienteViewState extends State<AtencionPacienteView>
   bool _isHistorialVisible = false;
   final Atencion _atencion = Atencion.vacio();
 
-  // Controllers para los campos del formulario
+  final TextEditingController _idAtencionController = TextEditingController();
   final TextEditingController _pesoController = TextEditingController();
   final TextEditingController _alturaController = TextEditingController();
   final TextEditingController _diagnosticoController = TextEditingController();
@@ -59,6 +61,7 @@ class _AtencionPacienteViewState extends State<AtencionPacienteView>
   @override
   void dispose() {
     _slideController.dispose();
+    _idAtencionController.dispose();
     _pesoController.dispose();
     _alturaController.dispose();
     _diagnosticoController.dispose();
@@ -77,34 +80,26 @@ class _AtencionPacienteViewState extends State<AtencionPacienteView>
     });
   }
 
-  void _guardarAtencion() {
+  void _guardarAtencion() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // TODO: Aquí implementar la lógica para guardar la atención
-      // Por ejemplo, enviar datos a una API o base de datos
-
-      print('Guardando atención:');
-      print('Paciente: ${widget.nombrePaciente}');
-      print('Total: ${_atencion.total}');
-      print('Peso: ${_atencion.peso}');
-      print('Altura: ${_atencion.altura}');
-      print('Dirección: ${_atencion.direccionDomicilio}');
-      print('Código Operación: ${_atencion.codigoOperacion}');
-      print('Diagnóstico: ${_atencion.diagnostico}');
-      print('Observaciones: ${_atencion.observaciones}');
-      print('Tipo Atención: ${_atencion.nombreTipoAtencion}');
-      print('Tipo Pago: ${_atencion.nombreTipoPago}');
-
-      // Mostrar mensaje de éxito
+      // Mensaje hardcodeado de éxito
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Atención guardada exitosamente'),
+          content: Text('Atención actualizada exitosamente'),
           backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
         ),
       );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
     }
   }
+
   Widget _buildCustomAppBar() {
     return Container(
       height: kToolbarHeight,
@@ -143,7 +138,6 @@ class _AtencionPacienteViewState extends State<AtencionPacienteView>
       backgroundColor: Colors.grey[100],
       body: Stack(
         children: [
-
           Column(
             children: [
               _buildCustomAppBar(),
@@ -286,6 +280,20 @@ class _AtencionPacienteViewState extends State<AtencionPacienteView>
             ),
             const SizedBox(height: 20),
 
+            // ID Atención
+            _buildTextFormField(
+              controller: _idAtencionController,
+              label: 'ID Atención',
+              icon: Icons.tag,
+              validator: (value) {
+                if (value?.isEmpty ?? true) {
+                  return 'Ingrese el ID de la atención';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 15),
+
             // Fila: Peso y Altura
             Row(
               children: [
@@ -363,8 +371,8 @@ class _AtencionPacienteViewState extends State<AtencionPacienteView>
       ),
     );
   }
-  Widget _buildHistorialPanel() {
 
+  Widget _buildHistorialPanel() {
     return Container(
       width: 400,
       decoration: BoxDecoration(

@@ -82,7 +82,6 @@ class _DashboardAdminViewState extends State<DashboardAdminView> {
                   icon: const Icon(Icons.account_circle, color: Colors.white),
                   onSelected: (value) => _controller.handleMenuAction(value, context),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'perfil', child: Text('Ver perfil')),
                     const PopupMenuItem(value: 'logout', child: Text('Cerrar sesión')),
                   ],
                 )

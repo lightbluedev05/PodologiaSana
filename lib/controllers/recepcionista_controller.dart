@@ -57,6 +57,16 @@ class RecepcionistaController {
     );
   }
 
+  // Método para abrir la vista de pacientes
+  void abrirPacientes(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PacientesView(),
+      ),
+    );
+  }
+
   // Método para obtener las opciones del menú (útil para testing o reutilización)
   List<MenuOption> getMenuOptions() {
     return [
@@ -80,6 +90,13 @@ class RecepcionistaController {
         icon: Icons.shopping_cart,
         color: Colors.purple,
         action: abrirRegistrarVentas,
+      ),
+      MenuOption(
+        title: 'Pacientes',
+        subtitle: 'Consultar y gestionar pacientes',
+        icon: Icons.people,
+        color: Colors.blue,
+        action: abrirPacientes,
       ),
     ];
   }
@@ -147,6 +164,28 @@ class ProcesarPagosView extends StatelessWidget {
       body: const Center(
         child: Text(
           'Pantalla de Procesar Pagos\n(Por implementar)',
+          style: TextStyle(fontSize: 18),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+// Nueva vista de Pacientes - AQUÍ PONDRÁS LA LÓGICA DE PACIENTES
+class PacientesView extends StatelessWidget {
+  const PacientesView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Gestión de Pacientes'),
+        backgroundColor: Colors.blue[700],
+      ),
+      body: const Center(
+        child: Text(
+          'Pantalla de Gestión de Pacientes\n(Por implementar)',
           style: TextStyle(fontSize: 18),
           textAlign: TextAlign.center,
         ),

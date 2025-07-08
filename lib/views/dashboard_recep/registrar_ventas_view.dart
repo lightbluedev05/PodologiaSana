@@ -104,7 +104,6 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
           if (_filterType == 'nombre') {
             return producto.nombre.toLowerCase().contains(query.toLowerCase());
           } else {
-            // Asumiendo que el producto tiene una propiedad 'categoria'
             return producto.categoria.toLowerCase().contains(
                 query.toLowerCase());
           }
@@ -1393,6 +1392,8 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
           _totalVenta = 0.0;
         });
         _limpiarCamposVenta();
+
+        await _loadProductos();
 
         print('=== VENTA COMPLETADA - LIMPIANDO DATOS ===');
         print('Carrito después de limpiar: $_carrito');

@@ -133,18 +133,21 @@ class _RecepcionistaViewState extends State<RecepcionistaView> {
 
     widgets.add(const SizedBox(height: 30));
 
-    // Segunda fila: Registrar Ventas (centrado)
+    // Segunda fila: Registrar Ventas y Pacientes
     widgets.add(
       Row(
         children: [
-          const Expanded(child: SizedBox()),
           Expanded(
-            flex: 2,
             child: _buildOptionCard(
               option: options[2], // Registrar Ventas
             ),
           ),
-          const Expanded(child: SizedBox()),
+          const SizedBox(width: 20),
+          Expanded(
+            child: _buildOptionCard(
+              option: options[3], // Pacientes
+            ),
+          ),
         ],
       ),
     );

@@ -100,20 +100,20 @@ class AtencionData {
     }
   }
   Future<bool> crearAtencion({
-    int? idPaciente,
+    String? idPaciente,
     int? idHistorial,
     int? idAtencion,
-    int tipoAtencion = 1,
-    int consultorio = 101,
+    String tipoAtencion = "",
+    int? consultorio = 101,
     String? direccionDomicilio,
     DateTime? fechaAtencion,
-    int? idDoctor,
+    String? idDoctor,
     String? diagnostico,
     String? observaciones,
     String? peso,
     String? altura,
     String total = '0',
-    int idTipoPago = 1,
+    String? idTipoPago = "",
     String? codigoOperacion,
   }) async {
     // Validación mínima opcional
@@ -125,22 +125,25 @@ class AtencionData {
     final url = Uri.parse('$baseUrl/atencion');
 
     final Map<String, dynamic> data = {
-      'id_paciente': 11,
-      'id_historial': 4,
-      'id_atencion': idAtencion,
+      'ident_paciente': idPaciente,
+      //'id_cita': idAtencion,
+      'ident_doctor': idDoctor,
       'tipo_atencion': tipoAtencion,
-      'consultorio': consultorio,
-      'direccion_domicilio': direccionDomicilio,
-      'fecha_atencion': fechaAtencion.toIso8601String(),
-      'id_doctor': idDoctor,
-      'diagnostico': diagnostico,
-      'observaciones': observaciones,
-      'peso': peso,
-      'altura': altura,
-      'total': total,
-      'id_tipo_pago': idTipoPago,
-      'codigo_operacion': codigoOperacion,
+      'consultorio': "104",
+      //'direccion': direccionDomicilio,
+      'tipo_pago': idTipoPago,
+      //'codigo_operacion': codigoOperacion,
+      'diagnostico': diagnostico ?? '.',
+      //'observaciones': observaciones,
+      //'peso': peso,
+      //'altura': altura,
+      'fecha': DateTime.now().toIso8601String().split('T')[0],
+      'hora': '${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}:00',
+      'tratamientos': [{"id_tratamiento": 1, "precio": 120.0}],
+      'afecciones': [2]
     };
+
+    print('Datos a enviar (crear atencion): ${json.encode(data)}');
 
     final response = await http.post(
       url,

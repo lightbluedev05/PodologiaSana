@@ -179,6 +179,7 @@ class _AtencionPagosViewState extends State<AtencionPagosView> {
         return _PagoDialog(
           cita: cita,
           doctores: doctores,
+          pacientes: pacientes,
           onPagoCompletado: () {
             _loadCitasHoy(); // Recargar las citas
           },
@@ -479,11 +480,13 @@ class _AtencionPagosViewState extends State<AtencionPagosView> {
 class _PagoDialog extends StatefulWidget {
   final Cita cita;
   final List<Doctor> doctores;
+  final List<Paciente> pacientes;
   final VoidCallback onPagoCompletado;
 
   const _PagoDialog({
     required this.cita,
     required this.doctores,
+    required this.pacientes,
     required this.onPagoCompletado,
   });
 
@@ -533,23 +536,52 @@ class _PagoDialogState extends State<_PagoDialog> {
         orElse: () => widget.doctores.first,
       );
 
+      final paciente = widget.pacientes.firstWhere(
+        (p) => p.paciente == widget.cita.paciente,
+        orElse: () => widget.pacientes.first,
+      );
+
+      String tipo_pago_String = "";
+      switch (_tipoPagoSeleccionado) {
+        case 1:
+          tipo_pago_String = "efectivo";
+          break;
+        case 2:
+          tipo_pago_String = "transferencia";
+          break;
+        case 3:
+          tipo_pago_String = "tarjeta";
+          break;
+        case 4:
+          tipo_pago_String = "yape";
+          break;
+        case 5:
+          tipo_pago_String = "plin";
+          break;
+        case 6:
+          tipo_pago_String = "blim";
+          break;
+        default:
+          tipo_pago_String = "efectivo"; // Por defecto
+      }
+
       final success = await AtencionData().crearAtencion(
-        idPaciente: 78512349,
+        idPaciente: paciente.identificacion,
         idHistorial: 4,
         idAtencion: widget.cita.id,
-        tipoAtencion: widget.cita.tipo.toLowerCase() == 'consultorio' ? 1 : 2,
-        consultorio: widget.cita.tipo.toLowerCase() == 'consultorio' ? 1 : 0,
+        tipoAtencion: widget.cita.tipo.toLowerCase() == 'consultorio' ? "consultorio" : "domicilio",
+        consultorio: widget.cita.tipo.toLowerCase() == 'consultorio' ? 1 : null,
         direccionDomicilio: widget.cita.tipo.toLowerCase() == 'domicilio'
             ? _direccionController.text
             : null,
         fechaAtencion: DateTime.now(),
-        idDoctor: doctor.id,
+        idDoctor: doctor.identificacion,
         diagnostico: null,
         observaciones: null,
         peso: null,
         altura: null,
         total: _totalController.text,
-        idTipoPago: _tipoPagoSeleccionado,
+        idTipoPago: tipo_pago_String,
         codigoOperacion: _tipoPagoSeleccionado == 2 && _codigoOperacionController.text.isNotEmpty
             ? _codigoOperacionController.text
             : null,

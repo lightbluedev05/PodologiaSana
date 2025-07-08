@@ -4,6 +4,8 @@ import '../../data/citas_data.dart';
 import '../../models/citas_model.dart';
 import '../../models/doctor_model.dart';
 import '../../data/doctor_data.dart';
+import '../../models/paciente_model.dart';
+import '../../data/paciente_data.dart';
 
 class AdminCitasView extends StatefulWidget {
   const AdminCitasView({super.key});
@@ -22,12 +24,16 @@ class _AdminCitasViewState extends State<AdminCitasView> {
   final DoctorData _data = DoctorData();
   List<Doctor> doctores = [];
   Map<int, String> mapaDoctores = {};
+  final PacienteData _dataPA = PacienteData();
+  List<Paciente> pacientes = [];
+  Map<int, String> mapaPacientes = {};
 
   @override
   void initState() {
     super.initState();
     _loadAllCitas();
     _loadDoctores();
+    _loadPacientes();
   }
 
   Future<void> _loadAllCitas() async {
@@ -55,19 +61,500 @@ class _AdminCitasViewState extends State<AdminCitasView> {
   }
 
   Future<void> _loadDoctores() async {
+    print('⏳ Iniciando carga de doctores...');
+
     try {
       final result = await _data.fetchDoctores();
+
+      print('✅ Doctores recibidos: ${result.length}');
+      for (var d in result) {
+        print('👨‍⚕️ Doctor: id=${d.id}, nombre=${d.nombre}, apellido=${d.apellido}');
+      }
+
+      if (!mounted) {
+        print('⚠️ El widget ya no está montado, se cancela setState');
+        return;
+      }
+
       setState(() {
         doctores = result;
         mapaDoctores = {
-          for (var d in result) d.id: '${d.nombre} ${d.apellido}'
+          for (var d in result)
+            d.id: '${d.nombre ?? "[sin nombre]"} ${d.apellido ?? "[sin apellido]"}'
         };
       });
+
+      print('🎯 Doctores cargados y mapeados exitosamente');
+    } catch (e, stackTrace) {
+      print('❌ Error al cargar doctores: $e');
+      print('🔍 StackTrace: $stackTrace');
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al cargar la lista de doctores'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _loadPacientes() async {
+    print('⏳ Iniciando carga de pacientes...');
+
+    try {
+      final result = await _dataPA.fetchPacientes();
+
+      print('✅ Pacientes recibidos: ${result.length}');
+      for (var p in result) {
+        print('🧍 Paciente: id=${p.id_paciente}, nombre=${p.paciente}');
+      }
+
+      if (!mounted) {
+        print('⚠️ El widget ya no está montado, se cancela setState');
+        return;
+      }
+
+      setState(() {
+        pacientes = result;
+        mapaPacientes = {
+          for (var p in result)
+            p.id_paciente: p.paciente ?? '[Sin nombre]'
+        };
+        print("------------------------------------------------");
+        print(mapaPacientes);
+        print("------------------------------------------------");
+      });
+
+      print('🎯 Pacientes cargados y mapeados exitosamente');
+    } catch (e, stackTrace) {
+      print('❌ Error al cargar pacientes: $e');
+      print('🔍 StackTrace: $stackTrace');
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al cargar la lista de pacientes'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // NUEVA FUNCIÓN PARA CREAR CITA
+  void crearNuevaCita() async {
+    // Variables para el formulario
+    int? pacienteSeleccionadoId;
+    int? doctorSeleccionadoId;
+    String identificacionPaciente = '';
+    String identificacionDoctor = '';
+    String motivo = '';
+    DateTime? fechaSeleccionada;
+    TimeOfDay? horaSeleccionada;
+    int tipoSeleccionado = 8; // Default: Consultorio
+    int estadoSeleccionado = 10; // Default: Pendiente
+
+    final TextEditingController motivoController = TextEditingController();
+    final TextEditingController identificacionPacienteController = TextEditingController();
+    final TextEditingController identificacionDoctorController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF2ECC71).withOpacity(0.1),
+                      const Color(0xFF27AE60).withOpacity(0.1),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.add, color: Color(0xFF2ECC71), size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Crear Nueva Cita',
+                  style: GoogleFonts.roboto(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: const Color(0xFF2C3E50),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInfoSection('Información del Paciente', [
+                    // Identificación del paciente
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.badge, size: 18, color: Colors.grey[600]),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Identificación del Paciente',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: identificacionPacienteController,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            hintText: 'Ingrese la identificación del paciente',
+                          ),
+                          onChanged: (valor) {
+                            identificacionPaciente = valor;
+                            // Buscar paciente por identificación
+                            for (var paciente in pacientes) {
+                              if (paciente.paciente?.contains(valor) == true) {
+                                setDialogState(() {
+                                  pacienteSeleccionadoId = paciente.id_paciente;
+                                });
+                                break;
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ]),
+                  const SizedBox(height: 20),
+                  _buildInfoSection('Información Médica', [
+                    // Identificación del doctor
+                    const SizedBox(height: 10),
+                    // Doctor
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.medical_services, size: 18, color: Colors.grey[600]),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Doctor',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<int>(
+                          value: doctorSeleccionadoId,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            hintText: 'Seleccione un doctor',
+                          ),
+                          items: doctores.map((doctor) {
+                            return DropdownMenuItem<int>(
+                              value: doctor.id,
+                              child: Text('Dr. ${doctor.nombre} ${doctor.apellido}'),
+                            );
+                          }).toList(),
+                          onChanged: (nuevoId) {
+                            setDialogState(() {
+                              doctorSeleccionadoId = nuevoId;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Motivo
+                    TextField(
+                      controller: motivoController,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        labelText: 'Motivo de la cita',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        hintText: 'Ingrese el motivo de la consulta',
+                      ),
+                      onChanged: (valor) => motivo = valor,
+                    ),
+                  ]),
+                  const SizedBox(height: 20),
+                  _buildInfoSection('Detalles de la Cita', [
+                    // Tipo de cita
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.category, size: 18, color: Colors.grey[600]),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Tipo de Cita',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<int>(
+                          value: tipoSeleccionado,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          items: const [
+                            DropdownMenuItem(value: 8, child: Text('Consultorio')),
+                            DropdownMenuItem(value: 9, child: Text('Domicilio')),
+                          ],
+                          onChanged: (valor) {
+                            setDialogState(() {
+                              tipoSeleccionado = valor!;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Fecha
+                    GestureDetector(
+                      onTap: () async {
+                        final pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2100),
+                          locale: const Locale('es', 'ES'),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: const ColorScheme.light(
+                                  primary: Color(0xFF2ECC71),
+                                  onPrimary: Colors.white,
+                                  onSurface: Colors.black,
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                        if (pickedDate != null) {
+                          setDialogState(() {
+                            fechaSeleccionada = pickedDate;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.calendar_today, size: 18, color: Colors.grey[600]),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                fechaSeleccionada != null
+                                    ? '${fechaSeleccionada!.day.toString().padLeft(2, '0')}/${fechaSeleccionada!.month.toString().padLeft(2, '0')}/${fechaSeleccionada!.year}'
+                                    : 'Seleccionar fecha',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  color: fechaSeleccionada != null ? Colors.black : Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Hora
+                    GestureDetector(
+                      onTap: () async {
+                        final pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: const ColorScheme.light(
+                                  primary: Color(0xFF2ECC71),
+                                  onPrimary: Colors.white,
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                        if (pickedTime != null) {
+                          setDialogState(() {
+                            horaSeleccionada = pickedTime;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.access_time, size: 18, color: Colors.grey[600]),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                horaSeleccionada != null
+                                    ? '${horaSeleccionada!.hour.toString().padLeft(2, '0')}:${horaSeleccionada!.minute.toString().padLeft(2, '0')}'
+                                    : 'Seleccionar hora',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  color: horaSeleccionada != null ? Colors.black : Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(foregroundColor: Colors.grey[600]),
+              child: Text('Cancelar', style: GoogleFonts.roboto(fontWeight: FontWeight.w600)),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                final String fecha = '${fechaSeleccionada!.year.toString().padLeft(4, '0')}-'
+                    '${fechaSeleccionada!.month.toString().padLeft(2, '0')}-'
+                    '${fechaSeleccionada!.day.toString().padLeft(2, '0')}';
+
+                final String hora = '${horaSeleccionada!.hour.toString().padLeft(2, '0')}:'
+                    '${horaSeleccionada!.minute.toString().padLeft(2, '0')}';
+
+                Navigator.pop(context);
+                crearCita(
+                  TipoCita: tipoSeleccionado == 8 ? 'Consultorio' : 'Domicilio',
+                  idPaciente: pacienteSeleccionadoId!.toString(),
+                  fecha: fechaSeleccionada!,
+                  hora: DateTime(
+                    fechaSeleccionada!.year,
+                    fechaSeleccionada!.month,
+                    fechaSeleccionada!.day,
+                    horaSeleccionada!.hour,
+                    horaSeleccionada!.minute,
+                  ),
+                  idDoctor: doctorSeleccionadoId!.toString(),
+                  motivo: motivo,
+                );
+              },
+              icon: const Icon(Icons.save, size: 16),
+              label: Text('Crear Cita', style: GoogleFonts.roboto(fontWeight: FontWeight.w600)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2ECC71),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void crearCita({
+    required String TipoCita,
+    required String idPaciente,
+    required DateTime fecha,
+    required DateTime hora,
+    required String idDoctor,
+    required String motivo,
+  }) async {
+    try {
+      print('🛠 Creando cita con parámetros...');
+      print('Tipo Cita: $TipoCita');
+      print('Paciente: $idPaciente');
+      print('Fecha: $fecha');
+      print('Hora: $hora');
+      print('Doctor: $idDoctor');
+
+      bool creada = await CitaData().createCita(
+        TipoCita,
+        idPaciente,
+        idDoctor,
+        fecha,
+        hora,
+        motivo
+      );
+
+      if (creada) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Cita creada correctamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadAllCitas(); // Recarga las citas en pantalla
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ No se pudo crear la cita'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } catch (e) {
-      print('Error al cargar doctores: $e');
+      print('❌ Error al crear cita: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error al cargar la lista de doctores'),
+        SnackBar(
+          content: Text('❌ Error: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -192,22 +679,43 @@ class _AdminCitasViewState extends State<AdminCitasView> {
         return Colors.grey;
     }
   }
+
   void editarCita(Cita cita) async {
     // Obtener ID del doctor a partir del nombre
     String nombreDoctor = cita.doctor;
-    int? auxid;
+    int? auxidDoctor;
     mapaDoctores.forEach((id, nombre) {
       if (nombre == nombreDoctor || nombre == '$nombreDoctor') {
-        auxid = id;
+        auxidDoctor = id;
       }
     });
 
-    if (auxid == null) {
+    if (auxidDoctor == null) {
       print('⚠ No se encontró el doctor con nombre: $nombreDoctor');
     }
 
+    String nombrePaciente = cita.paciente;
+    print("PACIENTE");
+    print(nombrePaciente);
+    int? auxidPaciente;
+    mapaPacientes.forEach((id, nombre) {
+      print(nombre);
+      print(nombrePaciente);
+      if (nombre == nombrePaciente) {
+        auxidPaciente = id;
+      }
+    });
+
+    if (auxidPaciente == null) {
+      print('⚠ No se encontró el paciente con nombre: $nombrePaciente');
+    }
+
     // Variables editables
-    int? doctorSeleccionadoId = auxid;
+    int? doctorSeleccionadoId = auxidDoctor;
+    int? pacienteSeleccionadoId = auxidPaciente;
+    print("-------");
+    print(pacienteSeleccionadoId);
+    print("---------");
     String motivo = cita.motivo;
     DateTime? fechaSeleccionada = DateTime.tryParse(cita.fecha);
     TimeOfDay? horaSeleccionada = TimeOfDay(
@@ -267,7 +775,52 @@ class _AdminCitasViewState extends State<AdminCitasView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildInfoSection('Información del Paciente', [
-                    _buildInfoRow(Icons.person, 'Paciente', cita.paciente),
+                    // Selector de paciente
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.person, size: 18, color: Colors.grey[600]),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Paciente',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<int>(
+                          value: pacienteSeleccionadoId,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          items: pacientes.map((paciente) {
+                            return DropdownMenuItem<int>(
+                              value: paciente.id_paciente,
+                              // Use the paciente field instead of nombre and apellido
+                              child: Text(paciente.paciente ?? 'Sin nombre'),
+                              // Alternative: If you want to try splitting the name
+                              // child: Text(paciente.paciente?.isNotEmpty == true ? paciente.paciente! : 'Sin nombre'),
+                            );
+                          }).toList(),
+                          onChanged: (nuevoId) {
+                            setDialogState(() {
+                              pacienteSeleccionadoId = nuevoId;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ]),
                   const SizedBox(height: 20),
                   _buildInfoSection('Información Médica', [
@@ -449,12 +1002,6 @@ class _AdminCitasViewState extends State<AdminCitasView> {
             ),
             ElevatedButton.icon(
               onPressed: () {
-                if (doctorSeleccionadoId == null || fechaSeleccionada == null || horaSeleccionada == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Por favor, complete todos los campos')),
-                  );
-                  return;
-                }
 
                 final String fecha = '${fechaSeleccionada!.year.toString().padLeft(4, '0')}-'
                     '${fechaSeleccionada!.month.toString().padLeft(2, '0')}-'
@@ -466,7 +1013,7 @@ class _AdminCitasViewState extends State<AdminCitasView> {
                 Navigator.pop(context);
                 actualizarCita(
                   id: cita.id,
-                  idPaciente: 20,
+                  idPaciente: pacienteSeleccionadoId!,
                   motivo: motivo,
                   fecha: fecha,
                   hora: hora,
@@ -648,6 +1195,7 @@ class _AdminCitasViewState extends State<AdminCitasView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
+// Header con botón "Nueva Cita"
             Row(
               children: [
                 Expanded(
@@ -673,7 +1221,19 @@ class _AdminCitasViewState extends State<AdminCitasView> {
                     ],
                   ),
                 ),
-                // Botón de filtros
+                const SizedBox(width: 10),
+                ElevatedButton.icon(
+                  onPressed: crearNuevaCita, // <<--- AQUÍ tu función
+                  icon: const Icon(Icons.add),
+                  label: const Text('Nueva Cita'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF27AE60),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+                const SizedBox(width: 10),
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(

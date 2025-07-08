@@ -20,21 +20,18 @@ class Cita {
   });
 
   factory Cita.fromJson(Map<String, dynamic> json) {
-    String fechaHora = json['fecha_hora'];
-    DateTime parsedDate = DateTime.parse(fechaHora);
-
-    String nombreDoctor = "none";
-    nombreDoctor = json['doctor'].toString();
+    String fechaHora = json['fecha_hora'] ?? '';
+    DateTime parsedDate = DateTime.tryParse(fechaHora) ?? DateTime.now();
 
     return Cita(
-      id: json['id_cita'],
+      id: json['id_cita'] ?? 0,
       fecha: "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}",
       hora: "${parsedDate.hour.toString().padLeft(2, '0')}:${parsedDate.minute.toString().padLeft(2, '0')}",
-      paciente: json['paciente'],
-      motivo: json['motivo'],
-      tipo:  json['tipo_cita'],
-      doctor: nombreDoctor,
-      estado :json['estado']
+      paciente: json['paciente']?.toString() ?? 'Sin nombre',
+      motivo: json['motivo']?.toString() ?? 'Sin motivo',
+      tipo: json['tipo_cita']?.toString() ?? 'Desconocido',
+      doctor: json['doctor']?.toString() ?? 'Desconocido',
+      estado: json['estado']?.toString() ?? 'pendiente',
     );
   }
 

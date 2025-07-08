@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:podologia_sana/models/categoria_producto.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/productos_controller.dart';
 import '../../models/producto_model.dart';
@@ -84,11 +85,6 @@ class _ProductosViewState extends State<ProductosView> {
                           IconButton(
                             icon: const Icon(Icons.edit),
                             onPressed: () => _showFormDialog(context, producto: producto),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            color: Colors.red,
-                            onPressed: () => _showDeleteConfirmDialog(context, producto),
                           ),
                         ],
                       ),
@@ -290,7 +286,6 @@ class _ProductosViewState extends State<ProductosView> {
   }
 
   void _showCategoriaFormDialog(BuildContext context) {
-    final codigoCtrl = TextEditingController();
     final nombreCtrl = TextEditingController();
 
     showDialog(
@@ -298,10 +293,8 @@ class _ProductosViewState extends State<ProductosView> {
       builder: (_) => StatefulBuilder(
         builder: (context, setState) {
           bool _isFormValid() {
-            final codigo = codigoCtrl.text.trim();
             final nombre = nombreCtrl.text.trim();
-
-            return codigo.isNotEmpty && nombre.isNotEmpty;
+            return nombre.isNotEmpty;
           }
 
           return AlertDialog(
@@ -309,11 +302,6 @@ class _ProductosViewState extends State<ProductosView> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  controller: codigoCtrl,
-                  decoration: const InputDecoration(labelText: 'Código'),
-                  onChanged: (_) => setState(() {}),
-                ),
                 TextField(
                   controller: nombreCtrl,
                   decoration: const InputDecoration(labelText: 'Nombre'),
@@ -329,11 +317,15 @@ class _ProductosViewState extends State<ProductosView> {
               ElevatedButton(
                 onPressed: _isFormValid()
                     ? () async {
-                  final codigo = codigoCtrl.text.trim();
                   final nombre = nombreCtrl.text.trim();
 
                   try {
-                    // await _categoriaController.crearCategoria(codigo: codigo, nombre: nombre);
+                    CategoriaProducto categoria = CategoriaProducto(
+                      id: 0, // ID se asigna automáticamente en el backend
+                      codigo: "",
+                      nombre: nombre,
+                    );
+                    await _categoriaController.crearCategoria(categoria);
                     categorias = await _categoriaController.obtenerNombresCategorias();
                     setState(() {}); // Recarga dropdown de categorías
 

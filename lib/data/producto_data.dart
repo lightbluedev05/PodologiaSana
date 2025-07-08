@@ -48,28 +48,11 @@ class ProductoData {
     }
   }
 
-
   Future<void> updateProducto(Producto producto) async {
-    final url = '$baseUrl/producto/${producto.id}';
-    print(json.encode({
-      'id': producto.id,
-      'nombre': producto.nombre,
-      'descripcion': producto.descripcion,
-      'precio_venta': producto.precio_venta,
-      'stock': producto.stock,
-      'categoria': producto.categoria,
-    }));
     final response = await http.put(
-      Uri.parse(url),
+      Uri.parse('$baseUrl/producto/${producto.id}'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        //'id': producto.id,
-        'nombre': producto.nombre,
-        'descripcion': producto.descripcion,
-        'precio_venta': producto.precio_venta,
-        'stock': producto.stock,
-        'categoria': producto.categoria,
-      }),
+      body: jsonEncode(producto.toUpdateJson()),
     );
 
     if (response.statusCode != 200) {

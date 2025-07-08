@@ -1,6 +1,6 @@
 class Venta {
   int id;
-  int idPaciente;
+  String identificacion;
   String tipoPago;  // Cambio: ahora es String
   String? codigoOperacion;
   String fechaVenta;
@@ -11,7 +11,7 @@ class Venta {
 
   Venta({
     this.id = -1,
-    required this.idPaciente,
+    required this.identificacion,
     required this.tipoPago,  // Cambio: ahora es String requerido
     this.codigoOperacion,
     this.fechaVenta = '',
@@ -24,7 +24,7 @@ class Venta {
   // Leer a partir de un JSON
   factory Venta.fromJson(Map<String, dynamic> json) => Venta(
     id: json['id'] ?? -1,
-    idPaciente: json['id_paciente'],
+    identificacion: json['identificacion'],
     tipoPago: json['tipo_pago'],
     codigoOperacion: json['codigo_operacion'],
     fechaVenta: json['fecha_venta'] ?? '',
@@ -37,7 +37,7 @@ class Venta {
 
   // Transformar objeto a JSON para crear venta
   Map<String, dynamic> toJson() => {
-    'id_paciente': idPaciente,
+    'identificacion': identificacion,
     'tipo_pago': tipoPago,  // Cambio: ahora tipo_pago como string
     'codigo_operacion': codigoOperacion,
     'detalles': detalles?.map((detalle) => detalle.toJson()).toList(),

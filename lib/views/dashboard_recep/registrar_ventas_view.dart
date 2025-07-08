@@ -1261,9 +1261,20 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
   }
 
   // Método para procesar la venta
+// Método para procesar la venta
   void _procesarVenta() async {
+    print('=== INICIANDO PROCESAMIENTO DE VENTA ===');
+
+    // Imprimir estado inicial
+    print('Carrito: $_carrito');
+    print('Total venta: $_totalVenta');
+    print('DNI Cliente: ${_dniClienteController.text}');
+    print('Tipo de pago: $_tipoPago');
+    print('Código operación: ${_codigoOperacionController.text}');
+
     // Validaciones
     if (_carrito.isEmpty) {
+      print('ERROR: El carrito está vacío');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('El carrito está vacío'),
@@ -1273,8 +1284,8 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
       return;
     }
 
-    // Validar DNI del cliente
     if (_dniClienteController.text.isEmpty) {
+      print('ERROR: DNI del cliente está vacío');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Ingrese el DNI del cliente'),
@@ -1292,6 +1303,7 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
         _tipoPago == 'bim') &&
         _codigoOperacionController.text.isEmpty
     ) {
+      print('ERROR: Código de operación requerido para tipo de pago: $_tipoPago');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(_tipoPago == 'tarjeta'
@@ -1303,7 +1315,8 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
       return;
     }
 
-    // Mostrar diálogo de confirmación
+    print('=== VALIDACIONES PASADAS ===');
+
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1332,20 +1345,24 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
       ),
     );
 
+    print('Confirmación del usuario: $confirmar');
+
     if (confirmar == true) {
-      // Procesar la venta
       try {
-        // Crear los detalles de la venta desde el carrito
+        print('=== CREANDO DETALLES DE VENTA ===');
+
         List<DetalleVenta> detalles = _carrito.entries.map((entry) {
+          print('Producto ID: ${entry.key}, Cantidad: ${entry.value}');
           return DetalleVenta(
-            idProducto: entry.key,    // La clave es el id_producto
-            cantidad: entry.value,    // El valor es la cantidad
+            idProducto: entry.key,
+            cantidad: entry.value,
           );
         }).toList();
 
-        // Crear la venta
+        print('Detalles creados: ${detalles.length} elementos');
+
         Venta nuevaVenta = Venta(
-          idPaciente: int.parse(_dniClienteController.text),
+          identificacion: int.parse(_dniClienteController.text).toString(),
           tipoPago: _tipoPago,
           codigoOperacion: _codigoOperacionController.text.isEmpty
               ? null
@@ -1353,8 +1370,22 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
           detalles: detalles,
         );
 
+        print('=== OBJETO VENTA CREADO ===');
+        print('Identificación: ${nuevaVenta.identificacion}');
+        print('Tipo de pago: ${nuevaVenta.tipoPago}');
+        print('Código operación: ${nuevaVenta.codigoOperacion}');
+        print('Número de detalles: ${nuevaVenta.detalles!.length}');
+
+        print('Número de detalles: ${nuevaVenta.detalles?.length ?? 0}');
+        for (int i = 0; i < (nuevaVenta.detalles?.length ?? 0); i++) {
+          final detalle = nuevaVenta.detalles![i]; // aquí también podrías aplicar verificación adicional
+          print('Detalle $i - ID Producto: ${detalle.idProducto}, Cantidad: ${detalle.cantidad}');
+        }
+
+        print('=== ENVIANDO VENTA A BASE DE DATOS ===');
         VentaData ventaData = VentaData();
         await ventaData.createVenta(nuevaVenta);
+        print('Venta enviada exitosamente');
 
         // Limpiar el carrito y campos
         setState(() {
@@ -1363,10 +1394,12 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
         });
         _limpiarCamposVenta();
 
-        // Cerrar el modal
+        print('=== VENTA COMPLETADA - LIMPIANDO DATOS ===');
+        print('Carrito después de limpiar: $_carrito');
+        print('Total después de limpiar: $_totalVenta');
+
         Navigator.pop(context);
 
-        // Mostrar mensaje de éxito
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Venta registrada exitosamente'),
@@ -1374,7 +1407,7 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
           ),
         );
       } catch (e) {
-        // Mostrar error
+        print('ERROR AL PROCESAR VENTA: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al procesar la venta: $e'),
@@ -1382,6 +1415,10 @@ class _RegistrarVentasViewState extends State<RegistrarVentasView>
           ),
         );
       }
+    } else {
+      print('Venta cancelada por el usuario');
     }
+
+    print('=== FIN DEL PROCESAMIENTO ===');
   }
 }

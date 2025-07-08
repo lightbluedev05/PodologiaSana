@@ -35,4 +35,12 @@ class Producto {
     'categoria': categoria,
     'estado': estado,
   };
+
+  Map<String, dynamic> toUpdateJson() => {
+    'nombre': nombre,
+    'descripcion': descripcion,
+    'precio_venta': precio_venta,
+    'stock': stock,
+    'categoria': categoria,
+  };
 }

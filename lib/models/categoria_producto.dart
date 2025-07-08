@@ -24,4 +24,10 @@ class CategoriaProducto {
       'nombre': nombre,
     };
   }
+
+  Map<String, dynamic> toCreateJson() {
+    return {
+      'nombre': nombre,
+    };
+  }
 }

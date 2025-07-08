@@ -100,4 +100,56 @@ class AtencionData {
       throw Exception('Error al obtener atenciones del paciente');
     }
   }
+  Future<bool> crearAtencion({
+    required int idPaciente,
+    required int idHistorial,
+    required int idAtencion,
+    required int tipoAtencion,
+    required int consultorio,
+    String? direccionDomicilio,
+    required DateTime fechaAtencion,
+    required int idDoctor,
+    String? diagnostico,
+    String? observaciones,
+    String? peso,
+    String? altura,
+    required String total,
+    required int idTipoPago,
+    String? codigoOperacion,
+  }) async {
+    final url = Uri.parse('$baseUrl/atencion');
+
+    final Map<String, dynamic> data = {
+      'id_paciente': idPaciente,
+      'id_historial': idHistorial,
+      'id_atencion': idAtencion,
+      'tipo_atencion': tipoAtencion,
+      'consultorio': consultorio,
+      'direccion_domicilio': direccionDomicilio,
+      'fecha_atencion': fechaAtencion.toIso8601String(),
+      'id_doctor': idDoctor,
+      'diagnostico': diagnostico,
+      'observaciones': observaciones,
+      'peso': peso,
+      'altura': altura,
+      'total': total,
+      'id_tipo_pago': idTipoPago,
+      'codigo_operacion': codigoOperacion,
+    };
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(data),
+    );
+
+    print('Código de estado (crear atencion): ${response.statusCode}');
+    print('Respuesta: ${response.body}');
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

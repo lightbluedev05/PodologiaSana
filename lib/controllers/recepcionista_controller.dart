@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:podologia_sana/views/dashboard_admin/pacientes_view.dart';
 import 'package:podologia_sana/views/login_view.dart';
+import '../views/dashboard_admin/citas_view.dart';
 import '../models/producto_model.dart';
 import '../data/producto_data.dart';
 import '../views/dashboard_recep/registrar_ventas_view.dart';
 import '../app_routes.dart';
+import '../views/dashboard_admin/citas_view.dart';
+import '../views/dashboard_recep/atencion_pagos.dart';
 
 class RecepcionistaController {
   static final RecepcionistaController _instance = RecepcionistaController._internal();
@@ -141,13 +144,7 @@ class AgendarCitaView extends StatelessWidget {
         title: const Text('Agendar Cita'),
         backgroundColor: Colors.green[700],
       ),
-      body: const Center(
-        child: Text(
-          'Pantalla de Agendar Cita\n(Por implementar)',
-          style: TextStyle(fontSize: 18),
-          textAlign: TextAlign.center,
-        ),
-      ),
+      body: const AdminCitasView(),
     );
   }
 }
@@ -162,13 +159,7 @@ class ProcesarPagosView extends StatelessWidget {
         title: const Text('Procesar Pagos'),
         backgroundColor: Colors.orange[700],
       ),
-      body: const Center(
-        child: Text(
-          'Pantalla de Procesar Pagos\n(Por implementar)',
-          style: TextStyle(fontSize: 18),
-          textAlign: TextAlign.center,
-        ),
-      ),
+      body: const AtencionPagosView(),
     );
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:podologia_sana/views/login_view.dart';
 import 'package:podologia_sana/views/dashboard_admin_view.dart';
 import 'package:podologia_sana/views/dashboard_doctor_view.dart';
-import 'package:podologia_sana/views/dashboard_admin/estadisticasA_view.dart';
 import 'package:podologia_sana/views/recep_view.dart';
 
 class AppRoutes {
@@ -21,8 +20,6 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const DashboardAdminView());
       case dashboard_doctor:
         return MaterialPageRoute(builder: (_) => const DashboardDoctorView(idDoctor: 5));
-      case Estadisticas_Screen:
-        return MaterialPageRoute(builder: (_) => const EstadisticasScreen());
       case recepcionist:
         return MaterialPageRoute(builder: (_) => const RecepcionistaView());
       default:

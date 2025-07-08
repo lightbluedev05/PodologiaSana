@@ -6,6 +6,7 @@ class Cita {
   final String motivo;
   final String tipo;
   final String doctor;
+  final String estado;
 
   Cita({
     required this.id,
@@ -14,16 +15,13 @@ class Cita {
     required this.paciente,
     required this.motivo,
     required this.tipo,
-    required this.doctor
+    required this.doctor,
+    required this.estado
   });
 
   factory Cita.fromJson(Map<String, dynamic> json) {
     String fechaHora = json['fecha_hora'];
     DateTime parsedDate = DateTime.parse(fechaHora);
-
-    String tipoEvento = 'otro';
-
-    tipoEvento = json['tipo_cita'].toString().toLowerCase();
 
     String nombreDoctor = "none";
     nombreDoctor = json['doctor'].toString();
@@ -34,8 +32,9 @@ class Cita {
       hora: "${parsedDate.hour.toString().padLeft(2, '0')}:${parsedDate.minute.toString().padLeft(2, '0')}",
       paciente: json['paciente'],
       motivo: json['motivo'],
-      tipo: tipoEvento,
+      tipo:  json['tipo_cita'],
       doctor: nombreDoctor,
+      estado :json['estado']
     );
   }
 
